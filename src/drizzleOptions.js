@@ -1,6 +1,8 @@
 import ComplexStorage from './../build/contracts/ComplexStorage.json'
 import SimpleStorage from './../build/contracts/SimpleStorage.json'
 import TutorialToken from './../build/contracts/TutorialToken.json'
+import TobyToken from './../build/contracts/ERC20TobyToken.json'
+import TokenShop from './../build/contracts/ERC20TokenStore.json'
 
 const drizzleOptions = {
   web3: {
@@ -13,7 +15,9 @@ const drizzleOptions = {
   contracts: [
     ComplexStorage,
     SimpleStorage,
-    TutorialToken
+    TutorialToken,
+    TobyToken,
+    TokenShop
   ],
   events: {
     SimpleStorage: ['StorageSet']
