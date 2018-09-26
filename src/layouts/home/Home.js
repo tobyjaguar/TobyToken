@@ -18,8 +18,14 @@ class Home extends Component {
     this.handleSetButton = this.handleSetButton.bind(this)
 
     this.state = {
+      dataKey: null,
       storageAmount: 0
     }
+  }
+
+  componentDidMount() {
+    const dataKey = this.contracts.ERC20TobyToken.methods["decimals"].cacheCall()
+    this.setState({ dataKey })
   }
 
   handleInputChange(event) {
@@ -33,7 +39,14 @@ class Home extends Component {
   render() {
 
     //console.log(JSON.stringify(this.props, null, 4))
-
+    const tokenContract = this.context.drizzle.store.getState().contracts.ERC20TobyToken
+    const decimal = tokenContract.decimals[this.state.dataKey]
+    /**
+    if (decimal !== undefined) {
+        console.log(decimal.value)
+    }
+    **/
+    
     return (
       <main className="container">
         <div className="pure-g">
