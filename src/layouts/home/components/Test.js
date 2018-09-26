@@ -19,7 +19,8 @@ class Home extends Component {
       tokenTransferAmount: 0,
       tobyTokenRecipientAddress: '',
       tobyTokenMintAmount: 0,
-      tobyTokenBurnAmount: 0
+      tobyTokenBurnAmount: 0,
+      tokenShopAddress: ''
     }
   }
 
@@ -110,6 +111,14 @@ class Home extends Component {
               <input name="tobyTokenBurnAmount" type="number" value={this.state.tobyTokenBurnAmount} onChange={this.handleInputChange} placeholder="Amount" />
               <button className="pure-button" type="button" onClick={this.handleBurnTobyTokens}>Burn Tokens for {this.state.tobyTokenRecipientAddress}</button>
             </form>
+
+            <br/><br/>
+          </div>
+
+          <div className="pure-u-1-1">
+            <h2>TokenShop</h2>
+            <p>Address: </p>
+
 
             <br/><br/>
           </div>

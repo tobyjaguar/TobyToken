@@ -1,9 +1,39 @@
 import React, { Component } from 'react'
 import { AccountData, ContractData, ContractForm } from 'drizzle-react-components'
 import logo from '../../logo.png'
+import PropTypes from 'prop-types'
+
+/* components */
+import ShopItem from './components/ShopItem'
+import Admin from './components/Admin'
+
 
 class Home extends Component {
+  constructor(props, context) {
+    super(props)
+
+    this.contracts = context.drizzle.contracts
+
+    this.handleInputChange = this.handleInputChange.bind(this)
+    this.handleSetButton = this.handleSetButton.bind(this)
+
+    this.state = {
+      storageAmount: 0
+    }
+  }
+
+  handleInputChange(event) {
+    this.setState({ [event.target.name]: event.target.value })
+  }
+
+  handleSetButton() {
+    this.contracts.SimpleStorage02.methods.set(this.state.storageAmount).send()
+  }
+
   render() {
+
+    //console.log(JSON.stringify(this.props, null, 4))
+
     return (
       <main className="container">
         <div className="pure-g">
@@ -20,15 +50,19 @@ class Home extends Component {
             <AccountData accountIndex="0" units="ether" precision="3" />
             <AccountData accountIndex="1" units="ether" precision="3" />
             <AccountData accountIndex="2" units="ether" precision="3" />
-
+            <p><strong>Token Balance: </strong> <ContractData contract="ERC20TokenStore" method="getTokenBalance" methodArgs={[this.props.accounts[0]]} /></p>
             <br/><br/>
           </div>
+
           {/*
           <div className="pure-u-1-1">
             <h2>SimpleStorage</h2>
             <p>This shows a simple ContractData component with no arguments, along with a form to set its value.</p>
-            <p><strong>Stored Value</strong>: <ContractData contract="SimpleStorage" method="storedData" /></p>
-            <ContractForm contract="SimpleStorage" method="set" />
+            <p><strong>Stored Value</strong>: </p>
+            <form className="pure-form pure-form-stacked">
+              <input name="storageAmount" type="number" value={this.state.storageAmount} onChange={this.handleInputChange} />
+              <button className="pure-button" type="button" onClick={this.handleSetButton}>Store Value of {this.state.storageAmount}</button>
+            </form>
 
             <br/><br/>
           </div>
@@ -56,6 +90,7 @@ class Home extends Component {
             <br/><br/>
           </div>
           */}
+          {/*
           <div className="pure-u-1-1">
             <h2>TobyToken</h2>
             <p>This is the Token Contract.</p>
@@ -73,40 +108,40 @@ class Home extends Component {
             <p>Burn your tokens.</p>
             <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
 
-            {/*
+              //comment out
               <p><ContractForm contract="ERC20TobyToken" method="balanceOf" labels={['Address']} /></p>
-              */}
+
 
             <br/><br/>
           </div>
+          */}
 
           <div className="pure-u-1-1">
-            <h2>Token Shop</h2>
-            <p>Buy Tokens.</p>
-
-            <p><strong>Name: </strong> <ContractData contract="ERC20TokenStore" method="getTokenName" /></p>
-
-            <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenStore" method="getTokenSymbol" /></p>
-            <p><strong>Total Supply:</strong> <ContractData contract="ERC20TokenStore" method="getTokenSupply" methodArgs={[{from: this.props.accounts[0]}]} /></p>
-            <p><strong>My Balance</strong>: <ContractData contract="ERC20TokenStore" method="getTokenBalance" methodArgs={[this.props.accounts[0]]} /></p>
-            {/*
-            <h3>Mint Tokens</h3>
-            <ContractForm contract="ERC20TobyToken" method="mint" labels={['Recipient', 'Amount to Mint']} />
-
-            <h3>Burn Tokens</h3>
-            <p>Burn your tokens.</p>
-            <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
-
-              */}
+            <h2>TokenShop</h2>
+            <p>Shop Address: {this.contracts.ERC20TokenStore.address} </p>
+            <ShopItem />
 
             <br/><br/>
           </div>
 
+
+          <div className="pure-u-1-1">
+            <h2>Admin</h2>
+            <p>Shop Address: {this.contracts.ERC20TokenStore.address} </p>
+            <p>Token Address: {this.contracts.ERC20TobyToken.address} </p>
+            <Admin />
+
+            <br/><br/>
+          </div>
 
         </div>
       </main>
     )
   }
+}
+
+Home.contextTypes = {
+  drizzle: PropTypes.object
 }
 
 export default Home
