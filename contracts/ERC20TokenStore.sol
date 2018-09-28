@@ -29,10 +29,8 @@ contract ERC20TokenStore is Ownable, Pausable {
 
   uint256 public exchangeRate;
   uint256 public USDTETH;
-  uint256 public storeStock;
 
   event LogBuyToken(address eSender, uint256 eValue, uint256 eTokenAmount);
-  event LogSetStoreStock(address eSender, uint256 eTokenStock, uint256 eStoreStock);
   event LogSetExchangeRate(address eSender, uint256 eRate, uint256 eExchangeRate);
   event LogSetETHXRate(address eSender, uint256 eETHXRate);
   event LogDeposit(address eSender, uint256 eValue);
@@ -73,13 +71,15 @@ contract ERC20TokenStore is Ownable, Pausable {
   returns (bool)
   {
     require(msg.value > 0);
-    require(storeStock > 0);
+    require(tokenContract.balanceOf(address(this)) > 0);
+    //check not asking for more than stock
+    require(tokenContract.balanceOf(address(this)) >= msg.value);
+    //check value is at least 1 cross rate token bit unit per wei
     require(msg.value >= exchangeRate.mul(USDTETH).div(10**18));
     //wei to token bit conversion via dollars
     //$ per ETH * ETH per wei * (1 / $ per tokenbit) = tokenbit per wei
     uint256 _amount;
     _amount = msg.value.mul(exchangeRate).mul(USDTETH).div(10**(18));
-    setStoreStock();
     emit LogBuyToken(msg.sender, msg.value, _amount);
     tokenContract.transfer(msg.sender, _amount);
     return true;
@@ -87,19 +87,7 @@ contract ERC20TokenStore is Ownable, Pausable {
 
   //Store functions
   function getStoreStock() public view returns (uint256) {
-    return storeStock;
-  }
-
-  function setStoreStock()
-  whenNotPaused
-  public
-  returns (bool)
-  {
-    uint256 _stock;
-    _stock =  tokenContract.balanceOf(address(this));
-    storeStock = storeStock.add(_stock);
-    emit LogSetStoreStock(msg.sender, _stock, storeStock);
-    return true;
+    return tokenContract.balanceOf(address(this));
   }
 
   //Exchange rate in Dollars (i.e. Tokens per dollar)

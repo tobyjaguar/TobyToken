@@ -4,8 +4,6 @@ import { drizzleConnect } from 'drizzle-react'
 import PropTypes from 'prop-types'
 import web3 from 'web3'
 
-//import store from '../../../../store'
-
 class ShopItem extends Component {
   constructor(props, context) {
     super(props)
@@ -19,21 +17,27 @@ class ShopItem extends Component {
       dataKeyRate: null,
       dataKeyExchange: null,
       dataKeyDecimals: null,
+      dataKeyStock: null,
       ethRate: 1,
       exchangeRate: 1,
       tokenDecimals: 1,
+      shopStock: 0,
       weiAmount: '',
-      purchaseAmount: 0,
-      txReceipt: ''
+      purchaseAmount: 0
     }
   }
 
   componentDidMount() {
-    const dataKeyExchange = this.contracts.ERC20TokenStore.methods["exchangeRate"].cacheCall()
-    const dataKeyRate = this.contracts.ERC20TokenStore.methods["USDTETH"].cacheCall()
-    const dataKeyDecimals = this.contracts.ERC20TokenStore.methods["getTokenDecimals"].cacheCall()
-    //const dataKeyEvents = this.contracts.ERC20TokenStore.methods["events"].cacheCall()
-    this.setState({ dataKeyExchange, dataKeyRate, dataKeyDecimals })
+    const dataKeyExchange = this.contracts.ERC20TokenShop.methods["exchangeRate"].cacheCall()
+    const dataKeyRate = this.contracts.ERC20TokenShop.methods["USDTETH"].cacheCall()
+    const dataKeyDecimals = this.contracts.ERC20TokenShop.methods["getTokenDecimals"].cacheCall()
+    //const dataKeyEvents = this.contracts.ERC20TokenShop.methods["events"].cacheCall()
+    const dataKeyStock = this.contracts.ERC20TokenShop.methods["getShopStock"].cacheCall()
+    this.setState({ dataKeyExchange, dataKeyRate, dataKeyDecimals, dataKeyStock })
+
+    if (this.props.TokenShop.getShopStock[this.state.dataKeyStock] !== undefined) {
+      this.setShopStock(this.props.TokenShop)
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -42,14 +46,14 @@ class ShopItem extends Component {
         this.setEthRate(this.props.TokenShop)
         this.setExchangeRate(this.props.TokenShop)
         this.setDecimals(this.props.TokenShop)
+        this.setShopStock(this.props.TokenShop)
       }
     }
 
     if (this.props.transactions !== prevProps.transactions) {
-      //switch over resonses
-      this.setState({
-        txReceipt: this.props.transactions
-      })
+        this.setState({
+          txReceipt: this.props.transactions
+        })
     }
   }
 
@@ -57,10 +61,6 @@ class ShopItem extends Component {
     this.setState({ [event.target.name]: event.target.value })
     this.setTXParamValue(event.target.value)
     //this.fnTest(event.target.value)
-  }
-
-  handleSetButton() {
-    this.contracts.SimpleStorage.methods.set(this.state.storageAmount).send()
   }
 
   setTXParamValue(_value) {
@@ -77,11 +77,6 @@ class ShopItem extends Component {
     this.setState({
       weiAmount: exchangeRate.mul(weiDecimal).mul(tokenAmount).div(ethXRate).div(tokenBits).toString()
     })
-  }
-
-  fnTest(_value) {
-    var intVal = Number(_value)
-    this.setState({weiAmount: intVal + 1})
   }
 
   setEthRate(contract) {
@@ -108,28 +103,39 @@ class ShopItem extends Component {
     }
   }
 
+  setShopStock(contract) {
+    if (contract.getShopStock[this.state.dataKeyStock] !== undefined && this.state.dataKeyStock !== null) {
+      this.setState({
+        shopStock: contract.getShopStock[this.state.dataKeyStock].value
+      })
+    }
+  }
+
   render() {
 
-    //const contract = this.context.drizzle.store.getState().contracts.ERC20TokenStore
+    var BN = web3.utils.BN
+    var sendAmount = new BN(this.state.weiAmount)
+    //const contract = this.context.drizzle.store.getState().contracts.ERC20TokenShop
     //console.log(this.context.drizzle.store.getState())
     //console.log(this.state)
-    //console.log(this.context.drizzle.contracts.ERC20TokenStore)
-    //console.log(this.props)
+    //console.log(this.context.drizzle.contracts.ERC20TokenShop)
+    //console.log(this.props.transactions)
+    //console.log(this.contracts.ERC20TokenShop.methods.getShopStock().call())
 
     return (
       <div>
-      <p><strong>Name: </strong> <ContractData contract="ERC20TokenStore" method="getTokenName" /></p>
+      <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
 
-      <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenStore" method="getTokenSymbol" /></p>
-      <p><strong>Store Stock: </strong> <ContractData contract="ERC20TokenStore" method="getStoreStock" /></p>
+      <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
+      <p><strong>Store Stock: </strong> {this.state.shopStock}</p>
 
       <h3><p>Buy Tokens: </p></h3>
-      <p>How many Tokens:</p>
+      <p>Dollar amount of Tokens:</p>
       <form className="pure-form pure-form-stacked">
         <input name="purchaseAmount" type="number" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
       </form>
       <br/><br/>
-      <ContractForm contract="ERC20TokenStore" method="buyToken" sendArgs={[{from: this.props.accounts[0], value: this.state.weiAmount}]} />
+      <ContractForm contract="ERC20TokenShop" method="buyToken" sendArgs={{from: this.props.accounts[0], value: this.state.weiAmount}} />
 
       <p>State: </p>
       <p>ETH Rate: {this.state.ethRate} </p>
@@ -137,7 +143,7 @@ class ShopItem extends Component {
       <p>Decimals: {this.state.tokenDecimals} </p>
       <p>Wei Amount: {this.state.weiAmount} </p>
       <p>Purchase Amount: {this.state.purchaseAmount}</p>
-      <p>txStatus: {this.state.txReceipt}</p>
+
 
     </div>
     )
@@ -152,10 +158,8 @@ ShopItem.contextTypes = {
 const mapStateToProps = state => {
   return {
     accounts: state.accounts,
-    SimpleStorage: state.contracts.SimpleStorage,
-    TutorialToken: state.contracts.TutorialToken,
     TobyToken: state.contracts.ERC20TobyToken,
-    TokenShop: state.contracts.ERC20TokenStore,
+    TokenShop: state.contracts.ERC20TokenShop,
     drizzleStatus: state.drizzleStatus,
     transactionStack: state.transactionStack,
     transactions: state.transactions

@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'
 /* components */
 import ShopItem from './components/ShopItem'
 import Admin from './components/Admin'
+import TXObject from './components/TXObject'
 
 
 class Home extends Component {
@@ -15,45 +16,39 @@ class Home extends Component {
     this.contracts = context.drizzle.contracts
 
     this.handleInputChange = this.handleInputChange.bind(this)
-    this.handleSetButton = this.handleSetButton.bind(this)
 
     this.state = {
-      dataKey: null,
-      storageAmount: 0
+
     }
   }
 
   componentDidMount() {
-    const dataKey = this.contracts.ERC20TobyToken.methods["decimals"].cacheCall()
-    this.setState({ dataKey })
+
   }
 
   handleInputChange(event) {
     this.setState({ [event.target.name]: event.target.value })
   }
 
-  handleSetButton() {
-    this.contracts.SimpleStorage02.methods.set(this.state.storageAmount).send()
-  }
-
   render() {
-
-    //console.log(JSON.stringify(this.props, null, 4))
-    const tokenContract = this.context.drizzle.store.getState().contracts.ERC20TobyToken
-    const decimal = tokenContract.decimals[this.state.dataKey]
-    /**
-    if (decimal !== undefined) {
-        console.log(decimal.value)
+    var txResult
+    var stackId = this.props.transactionStack[this.props.transactionStack.length - 1]
+    if (this.props.transactions[stackId] !== undefined) {
+      if (stackId === undefined) {
+        txResult = <TXObject txHash={this.props.transactions[stackId].error.message} txStatus={this.props.transactions[stackId].status} />
+      } else {
+        txResult = <TXObject txHash={stackId} txStatus={this.props.transactions[stackId].status} />
+      }
     }
-    **/
-    
+    //console.log(JSON.stringify(this.props, null, 4))
+    //const tokenContract = this.context.drizzle.store.getState().contracts.ERC20TobyToken
+    //console.log(this.props.transactions[stackId])
     return (
       <main className="container">
         <div className="pure-g">
           <div className="pure-u-1-1 header">
             <img src={logo} alt="drizzle-logo" />
-            <h1>Drizzle Examples</h1>
-            <p>Examples of how to get started with Drizzle in various situations.</p>
+            <h1>Drizzle Example</h1>
 
             <br/><br/>
           </div>
@@ -61,9 +56,11 @@ class Home extends Component {
           <div className="pure-u-1-1">
             <h2>Active Account</h2>
             <AccountData accountIndex="0" units="ether" precision="3" />
+            <p><strong>Token Balance: </strong><ContractData contract="ERC20TokenShop" method="getTokenBalance" methodArgs={[this.props.accounts[0]]} /></p>
+
             <AccountData accountIndex="1" units="ether" precision="3" />
             <AccountData accountIndex="2" units="ether" precision="3" />
-            <p><strong>Token Balance: </strong> <ContractData contract="ERC20TokenStore" method="getTokenBalance" methodArgs={[this.props.accounts[0]]} /></p>
+
             <br/><br/>
           </div>
 
@@ -128,10 +125,13 @@ class Home extends Component {
             <br/><br/>
           </div>
           */}
+          {/*tx Return Object*/}
+            {txResult}
+
 
           <div className="pure-u-1-1">
             <h2>TokenShop</h2>
-            <p>Shop Address: {this.contracts.ERC20TokenStore.address} </p>
+            <p>Shop Address: {this.contracts.ERC20TokenShop.address} </p>
             <ShopItem />
 
             <br/><br/>
@@ -140,7 +140,7 @@ class Home extends Component {
 
           <div className="pure-u-1-1">
             <h2>Admin</h2>
-            <p>Shop Address: {this.contracts.ERC20TokenStore.address} </p>
+            <p>Shop Address: {this.contracts.ERC20TokenShop.address} </p>
             <p>Token Address: {this.contracts.ERC20TobyToken.address} </p>
             <Admin />
 

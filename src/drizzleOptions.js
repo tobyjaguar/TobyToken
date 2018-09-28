@@ -1,9 +1,5 @@
-import ComplexStorage from './../build/contracts/ComplexStorage.json'
-import SimpleStorage from './../build/contracts/SimpleStorage.json'
-import SimpleStorage2 from './../build/contracts/SimpleStorage02.json'
-import TutorialToken from './../build/contracts/TutorialToken.json'
 import TobyToken from './../build/contracts/ERC20TobyToken.json'
-import TokenShop from './../build/contracts/ERC20TokenStore.json'
+import TokenShop from './../build/contracts/ERC20TokenShop.json'
 
 const drizzleOptions = {
   web3: {
@@ -14,15 +10,16 @@ const drizzleOptions = {
     }
   },
   contracts: [
-    ComplexStorage,
-    SimpleStorage,
-    SimpleStorage2,
-    TutorialToken,
     TobyToken,
     TokenShop
   ],
   events: {
-    SimpleStorage: ['StorageSet']
+    //SimpleStorage: ['StorageSet']
+    TokenShopBuy: ['LogBuyToken'],
+    TokenShopSetExchange: ['LogSetExchangeRate'],
+    TokenShopSetEthXRate: ['LogSetETHXRate'],
+    TokenShopDeposit: ['LogDeposit'],
+    TokenShopWithdraw: ['LogWithdraw']
   },
   polls: {
     accounts: 1500

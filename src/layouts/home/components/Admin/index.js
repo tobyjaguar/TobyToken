@@ -11,25 +11,42 @@ class Admin extends Component {
     this.contracts = context.drizzle.contracts
 
     this.handleInputChange = this.handleInputChange.bind(this)
-    this.handleSetButton = this.handleSetButton.bind(this)
 
     this.state = {
-      txMintParams: {}
+      dataKeyStock: null,
+      txMintParams: {},
+      shopStock: 0
     }
   }
 
   componentDidMount() {
-    this.setState({
-      txMintParams: "from:" + this.props.accounts[0].toString()
-    })
+    const dataKeyStock = this.contracts.ERC20TokenShop.methods["getShopStock"].cacheCall()
+      this.setState({
+        dataKeyStock: dataKeyStock,
+        txMintParams: "from:" + this.props.accounts[0].toString()
+      })
+
+      if (this.props.TokenShop.getShopStock[this.state.dataKeyStock] !== undefined) {
+        this.setShopStock(this.props.TokenShop)
+      }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.TokenShop !== prevProps.TokenShop) {
+        this.setShopStock(this.props.TokenShop)
+    }
   }
 
   handleInputChange(event) {
     this.setState({ [event.target.name]: event.target.value })
   }
 
-  handleSetButton() {
-    this.contracts.SimpleStorage.methods.set(this.state.storageAmount).send()
+  setShopStock(contract) {
+    if (contract.getShopStock[this.state.dataKeyStock] !== undefined && this.state.dataKeyStock !== null) {
+      this.setState({
+        shopStock: contract.getShopStock[this.state.dataKeyStock].value
+      })
+    }
   }
 
   render() {
@@ -41,25 +58,22 @@ class Admin extends Component {
     //sendArgs={[{from: this.props.accounts[0]}]}
     return (
       <div>
-      <p><strong>Name: </strong> <ContractData contract="ERC20TokenStore" method="getTokenName" /></p>
+      <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
 
-      <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenStore" method="getTokenSymbol" /></p>
-      <p><strong>Store Stock: </strong> <ContractData contract="ERC20TokenStore" method="getStoreStock" /></p>
-      <p><strong>Exchange Rate: </strong> <ContractData contract="ERC20TokenStore" method="exchangeRate" /></p>
-      <p><strong>Exchange Rate: </strong> <ContractData contract="ERC20TokenStore" method="USDTETH" /></p>
+      <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
+      <p><strong>Store Stock: </strong> {this.state.shopStock}</p>
+      <p><strong>Exchange Rate: </strong> <ContractData contract="ERC20TokenShop" method="exchangeRate" /></p>
+      <p><strong>ETH Cross Rate: </strong> <ContractData contract="ERC20TokenShop" method="USDTETH" /></p>
 
       <h3><p>Store Stats</p></h3>
-      <strong>Set Stock: </strong>
-      <div><ContractForm contract="ERC20TokenStore" method="setStoreStock" /></div>
-      <br/>
       <strong>Set Exchange Rate: </strong>
-      <div><ContractForm contract="ERC20TokenStore" method="setExchangeRate" labels={['Dollars per Token']} /></div>
+      <div><ContractForm contract="ERC20TokenShop" method="setExchangeRate" labels={['Dollars per Token']} /></div>
       <br/>
       <strong>Set ETH Exchange Rate: </strong>
-      <div><ContractForm contract="ERC20TokenStore" method="setETHXRate" labels={['Dollars per ETH']} /></div>
+      <div><ContractForm contract="ERC20TokenShop" method="setETHXRate" labels={['Dollars per ETH']} /></div>
       <br/>
       <strong>Withdraw: </strong>
-      <div><ContractForm contract="ERC20TokenStore" method="withdraw" labels={['Amount']} /></div>
+      <div><ContractForm contract="ERC20TokenShop" method="withdraw" labels={['Amount']} /></div>
       <br/>
 
       <h3><p>Allocate Tokens to the Shop: </p></h3>
@@ -84,10 +98,8 @@ Admin.contextTypes = {
 const mapStateToProps = state => {
   return {
     accounts: state.accounts,
-    SimpleStorage: state.contracts.SimpleStorage,
-    TutorialToken: state.contracts.TutorialToken,
     TobyToken: state.contracts.ERC20TobyToken,
-    TokenShop: state.contracts.ERC20TokenStore,
+    TokenShop: state.contracts.ERC20TokenShop,
     drizzleStatus: state.drizzleStatus
   }
 }
