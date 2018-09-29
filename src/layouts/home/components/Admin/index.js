@@ -14,21 +14,14 @@ class Admin extends Component {
 
     this.state = {
       dataKeyStock: null,
-      txMintParams: {},
       shopStock: 0
     }
   }
 
   componentDidMount() {
     const dataKeyStock = this.contracts.ERC20TokenShop.methods["getShopStock"].cacheCall()
-      this.setState({
-        dataKeyStock: dataKeyStock,
-        txMintParams: "from:" + this.props.accounts[0].toString()
-      })
-
-      if (this.props.TokenShop.getShopStock[this.state.dataKeyStock] !== undefined) {
-        this.setShopStock(this.props.TokenShop)
-      }
+    this.setState({dataKeyStock})
+    this.setShopStock(this.props.TokenShop)
   }
 
   componentDidUpdate(prevProps) {
@@ -56,34 +49,39 @@ class Admin extends Component {
     //console.log(this.contracts.ERC20TobyToken)
     //console.log(this.state.txParams)
     //sendArgs={[{from: this.props.accounts[0]}]}
+    //console.log(this.props.accounts)
     return (
       <div>
-      <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
+        <h2>Admin</h2>
+        <p>Shop Address: {this.contracts.ERC20TokenShop.address} </p>
+        <p>Token Address: {this.contracts.ERC20TobyToken.address} </p>
 
-      <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
-      <p><strong>Store Stock: </strong> {this.state.shopStock}</p>
-      <p><strong>Exchange Rate: </strong> <ContractData contract="ERC20TokenShop" method="exchangeRate" /></p>
-      <p><strong>ETH Cross Rate: </strong> <ContractData contract="ERC20TokenShop" method="USDTETH" /></p>
+        <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
 
-      <h3><p>Store Stats</p></h3>
-      <strong>Set Exchange Rate: </strong>
-      <div><ContractForm contract="ERC20TokenShop" method="setExchangeRate" labels={['Dollars per Token']} /></div>
-      <br/>
-      <strong>Set ETH Exchange Rate: </strong>
-      <div><ContractForm contract="ERC20TokenShop" method="setETHXRate" labels={['Dollars per ETH']} /></div>
-      <br/>
-      <strong>Withdraw: </strong>
-      <div><ContractForm contract="ERC20TokenShop" method="withdraw" labels={['Amount']} /></div>
-      <br/>
+        <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
+        <p><strong>Store Stock: </strong> {this.state.shopStock}</p>
+        <p><strong>Exchange Rate: </strong> <ContractData contract="ERC20TokenShop" method="exchangeRate" /></p>
+        <p><strong>ETH Cross Rate: </strong> <ContractData contract="ERC20TokenShop" method="USDTETH" /></p>
 
-      <h3><p>Allocate Tokens to the Shop: </p></h3>
-      <p>Mint Tokens to the store:</p>
-      <ContractForm contract="ERC20TobyToken" method="mint" labels={['Recipient', 'Amount to Mint']} />
+        <h3><p>Store Stats</p></h3>
+        <strong>Set Exchange Rate: </strong>
+        <div><ContractForm contract="ERC20TokenShop" method="setExchangeRate" labels={['Dollars per Token']} /></div>
+        <br/>
+        <strong>Set ETH Exchange Rate: </strong>
+        <div><ContractForm contract="ERC20TokenShop" method="setETHXRate" labels={['Dollars per ETH']} /></div>
+        <br/>
+        <strong>Withdraw: </strong>
+        <div><ContractForm contract="ERC20TokenShop" method="withdraw" labels={['Amount']} /></div>
+        <br/>
 
-      <h3>Burn Tokens</h3>
-      <p>Burn your tokens.</p>
-      <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
-    </div>
+        <h3><p>Allocate Tokens to the Shop: </p></h3>
+        <p>Mint Tokens to the store:</p>
+        <ContractForm contract="ERC20TobyToken" method="mint" labels={['Recipient', 'Amount to Mint']} />
+
+        <h3>Burn Tokens</h3>
+        <p>Burn your tokens.</p>
+        <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
+      </div>
     )
 
   }

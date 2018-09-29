@@ -4,6 +4,9 @@ import { drizzleConnect } from 'drizzle-react'
 import PropTypes from 'prop-types'
 import web3 from 'web3'
 
+//components
+import Button from '@material-ui/core/Button'
+
 class ShopItem extends Component {
   constructor(props, context) {
     super(props)
@@ -11,6 +14,7 @@ class ShopItem extends Component {
     this.contracts = context.drizzle.contracts
 
     this.handleInputChange = this.handleInputChange.bind(this)
+    this.handleBuyButton = this.handleBuyButton.bind(this)
     this.setTXParamValue = this.setTXParamValue.bind(this)
 
     this.state = {
@@ -31,8 +35,9 @@ class ShopItem extends Component {
     const dataKeyExchange = this.contracts.ERC20TokenShop.methods["exchangeRate"].cacheCall()
     const dataKeyRate = this.contracts.ERC20TokenShop.methods["USDTETH"].cacheCall()
     const dataKeyDecimals = this.contracts.ERC20TokenShop.methods["getTokenDecimals"].cacheCall()
-    //const dataKeyEvents = this.contracts.ERC20TokenShop.methods["events"].cacheCall()
     const dataKeyStock = this.contracts.ERC20TokenShop.methods["getShopStock"].cacheCall()
+    //const dataKeyEvents = this.contracts.ERC20TokenShop.methods["events"].cacheCall()
+
     this.setState({ dataKeyExchange, dataKeyRate, dataKeyDecimals, dataKeyStock })
 
     if (this.props.TokenShop.getShopStock[this.state.dataKeyStock] !== undefined) {
@@ -49,18 +54,16 @@ class ShopItem extends Component {
         this.setShopStock(this.props.TokenShop)
       }
     }
-
-    if (this.props.transactions !== prevProps.transactions) {
-        this.setState({
-          txReceipt: this.props.transactions
-        })
-    }
   }
 
   handleInputChange(event) {
     this.setState({ [event.target.name]: event.target.value })
     this.setTXParamValue(event.target.value)
     //this.fnTest(event.target.value)
+  }
+
+  handleBuyButton(event) {
+    this.contracts.ERC20TokenShop.methods["buyToken"].cacheSend({from: this.props.accounts[0], value: this.state.weiAmount})
   }
 
   setTXParamValue(_value) {
@@ -112,9 +115,6 @@ class ShopItem extends Component {
   }
 
   render() {
-
-    var BN = web3.utils.BN
-    var sendAmount = new BN(this.state.weiAmount)
     //const contract = this.context.drizzle.store.getState().contracts.ERC20TokenShop
     //console.log(this.context.drizzle.store.getState())
     //console.log(this.state)
@@ -133,9 +133,13 @@ class ShopItem extends Component {
       <p>Dollar amount of Tokens:</p>
       <form className="pure-form pure-form-stacked">
         <input name="purchaseAmount" type="number" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
+        <Button type="Button" variant="contained" onClick={this.handleBuyButton}>Buy</Button>
       </form>
       <br/><br/>
+      {/*
       <ContractForm contract="ERC20TokenShop" method="buyToken" sendArgs={{from: this.props.accounts[0], value: this.state.weiAmount}} />
+      */}
+
 
       <p>State: </p>
       <p>ETH Rate: {this.state.ethRate} </p>
@@ -144,8 +148,7 @@ class ShopItem extends Component {
       <p>Wei Amount: {this.state.weiAmount} </p>
       <p>Purchase Amount: {this.state.purchaseAmount}</p>
 
-
-    </div>
+      </div>
     )
   }
 }

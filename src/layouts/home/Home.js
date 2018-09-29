@@ -6,7 +6,9 @@ import PropTypes from 'prop-types'
 /* components */
 import ShopItem from './components/ShopItem'
 import Admin from './components/Admin'
-import TXObject from './components/TXObject'
+import TXModal from './components/TXModal'
+//import TXObject from './components/TXObject'
+//import LogIn from './components/LogIn'
 
 
 class Home extends Component {
@@ -16,42 +18,69 @@ class Home extends Component {
     this.contracts = context.drizzle.contracts
 
     this.handleInputChange = this.handleInputChange.bind(this)
+    this.handleLogInButton = this.handleLogInButton.bind(this)
 
     this.state = {
-
+        loggedIn: false,
+        dataKeyOwner: null,
+        shopKeeper: '',
     }
   }
 
   componentDidMount() {
+    const dataKeyOwner = this.contracts.ERC20TokenShop.methods["owner"].cacheCall()
+    this.setState({dataKeyOwner})
+    this.setShopKeeper(this.props.TokenShop)
+  }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.TokenShop !== prevProps.TokenShop) {
+      this.setShopKeeper(this.props.TokenShop)
+    }
   }
 
   handleInputChange(event) {
     this.setState({ [event.target.name]: event.target.value })
   }
 
-  render() {
-    var txResult
-    var stackId = this.props.transactionStack[this.props.transactionStack.length - 1]
-    if (this.props.transactions[stackId] !== undefined) {
-      if (stackId === undefined) {
-        txResult = <TXObject txHash={this.props.transactions[stackId].error.message} txStatus={this.props.transactions[stackId].status} />
-      } else {
-        txResult = <TXObject txHash={stackId} txStatus={this.props.transactions[stackId].status} />
-      }
+  setShopKeeper(contract) {
+    if (contract.owner[this.state.dataKeyOwner] !== undefined && this.state.dataKeyOwner !== null) {
+      this.setState({
+        shopKeeper: contract.owner[this.state.dataKeyOwner].value
+      })
     }
+  }
+
+  handleLogInButton() {
+    var owner
+    owner = this.props.accounts[0]
+    if (this.state.shopKeeper === owner) {
+      this.setState({loggedIn: true})
+    }
+  }
+
+  render() {
+    var displayAdmin
+    if (this.state.loggedIn) {
+      displayAdmin = <Admin />
+    }
+
     //console.log(JSON.stringify(this.props, null, 4))
     //const tokenContract = this.context.drizzle.store.getState().contracts.ERC20TobyToken
     //console.log(this.props.transactions[stackId])
+    //console.log(this.state.loggedIn)
+    //console.log(this.state.shopKeeper)
     return (
       <main className="container">
         <div className="pure-g">
+          {/*
           <div className="pure-u-1-1 header">
             <img src={logo} alt="drizzle-logo" />
             <h1>Drizzle Example</h1>
 
             <br/><br/>
           </div>
+          */}
 
           <div className="pure-u-1-1">
             <h2>Active Account</h2>
@@ -77,58 +106,10 @@ class Home extends Component {
             <br/><br/>
           </div>
           */}
-          {/*
-          <div className="pure-u-1-1">
-            <h2>TutorialToken</h2>
-            <p>Here we have a form with custom, friendly labels. Also note the token symbol will not display a loading indicator. We've suppressed it with the <code>hideIndicator</code> prop because we know this variable is constant.</p>
-            <p><strong>Total Supply</strong>: <ContractData contract="TutorialToken" method="totalSupply" methodArgs={[{from: this.props.accounts[0]}]} /> <ContractData contract="TutorialToken" method="symbol" hideIndicator /></p>
-            <p><strong>My Balance</strong>: <ContractData contract="TutorialToken" method="balanceOf" methodArgs={[this.props.accounts[0]]} /></p>
-            <h3>Send Tokens</h3>
-            <ContractForm contract="TutorialToken" method="transfer" labels={['To Address', 'Amount to Send']} />
 
-            <br/><br/>
-          </div>
-          */}
-          {/*
-          <div className="pure-u-1-1">
-            <h2>ComplexStorage</h2>
-            <p>Finally this contract shows data types with additional considerations. Note in the code the strings below are converted from bytes to UTF-8 strings and the device data struct is iterated as a list.</p>
-            <p><strong>String 1</strong>: <ContractData contract="ComplexStorage" method="string1" toUtf8 /></p>
-            <p><strong>String 2</strong>: <ContractData contract="ComplexStorage" method="string2" toUtf8 /></p>
-            <strong>Single Device Data</strong>: <ContractData contract="ComplexStorage" method="singleDD" />
-
-            <br/><br/>
-          </div>
-          */}
-          {/*
-          <div className="pure-u-1-1">
-            <h2>TobyToken</h2>
-            <p>This is the Token Contract.</p>
-
-            <p><strong>Name: </strong> <ContractData contract="ERC20TobyToken" method="name" /></p>
-
-            <p><strong>Symbol: </strong> <ContractData contract="ERC20TobyToken" method="symbol" /></p>
-            <p><strong>Total Supply:</strong> <ContractData contract="ERC20TobyToken" method="totalSupply" methodArgs={[{from: this.props.accounts[0]}]} /></p>
-            <p><strong>My Balance</strong>: <ContractData contract="ERC20TobyToken" method="balanceOf" methodArgs={[this.props.accounts[0]]} /></p>
-
-            <h3>Mint Tokens</h3>
-            <ContractForm contract="ERC20TobyToken" method="mint" labels={['Recipient', 'Amount to Mint']} />
-
-            <h3>Burn Tokens</h3>
-            <p>Burn your tokens.</p>
-            <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
-
-              //comment out
-              <p><ContractForm contract="ERC20TobyToken" method="balanceOf" labels={['Address']} /></p>
-
-
-            <br/><br/>
-          </div>
-          */}
           {/*tx Return Object*/}
-            {txResult}
-
-
+            {/*{txResult}*/}
+            <TXModal />
           <div className="pure-u-1-1">
             <h2>TokenShop</h2>
             <p>Shop Address: {this.contracts.ERC20TokenShop.address} </p>
@@ -137,13 +118,12 @@ class Home extends Component {
             <br/><br/>
           </div>
 
-
           <div className="pure-u-1-1">
-            <h2>Admin</h2>
-            <p>Shop Address: {this.contracts.ERC20TokenShop.address} </p>
-            <p>Token Address: {this.contracts.ERC20TobyToken.address} </p>
-            <Admin />
-
+            {displayAdmin}
+            <br/>
+            <form className="pure-form pure-form-stacked">
+              <button className="pure-button" type="button" onClick={this.handleLogInButton}> Login </button>
+            </form>
             <br/><br/>
           </div>
 
