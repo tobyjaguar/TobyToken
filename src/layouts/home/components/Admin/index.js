@@ -14,7 +14,8 @@ class Admin extends Component {
 
     this.state = {
       dataKeyStock: null,
-      shopStock: 0
+      shopStock: 0,
+      depositAmount: 0
     }
   }
 
@@ -74,6 +75,17 @@ class Admin extends Component {
         <div><ContractForm contract="ERC20TokenShop" method="withdraw" labels={['Amount']} /></div>
         <br/>
 
+        <h3>Deposit</h3>
+        <p>Add funds</p>
+        <form className="pure-form pure-form-stacked">
+          <input name="depositAmount" type="number" value={this.state.depositAmount} onChange={this.handleInputChange} />
+        </form>
+        <ContractForm contract="ERC20TokenShop" method="deposit" sendArgs={{from: this.props.accounts[0], value: this.state.depositAmount}} />
+
+        <h3>Get Oracle</h3>
+        <p>Ask the oracle for the price</p>
+        <ContractForm contract="ERC20TokenShop" method="updatePrice" />
+
         <h3><p>Allocate Tokens to the Shop: </p></h3>
         <p>Mint Tokens to the store:</p>
         <ContractForm contract="ERC20TobyToken" method="mint" labels={['Recipient', 'Amount to Mint']} />
@@ -81,6 +93,12 @@ class Admin extends Component {
         <h3>Burn Tokens</h3>
         <p>Burn your tokens.</p>
         <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
+
+        {/*
+        <h3>Kill The Shop Contract</h3>
+        <p>kill this contract</p>
+        <ContractForm contract="ERC20TobyToken" method="kill" sendArgs={{from: this.props.accounts[0]}} />
+        */}
       </div>
     )
 

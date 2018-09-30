@@ -10,7 +10,6 @@ import TXModal from './components/TXModal'
 //import TXObject from './components/TXObject'
 //import LogIn from './components/LogIn'
 
-
 class Home extends Component {
   constructor(props, context) {
     super(props)
@@ -64,7 +63,6 @@ class Home extends Component {
     if (this.state.loggedIn) {
       displayAdmin = <Admin />
     }
-
     //console.log(JSON.stringify(this.props, null, 4))
     //const tokenContract = this.context.drizzle.store.getState().contracts.ERC20TobyToken
     //console.log(this.props.transactions[stackId])

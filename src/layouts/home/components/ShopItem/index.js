@@ -22,10 +22,12 @@ class ShopItem extends Component {
       dataKeyExchange: null,
       dataKeyDecimals: null,
       dataKeyStock: null,
+      dataKeyTax: null,
       ethRate: 1,
       exchangeRate: 1,
       tokenDecimals: 1,
       shopStock: 0,
+      oracleTax: 0,
       weiAmount: '',
       purchaseAmount: 0
     }
@@ -36,9 +38,10 @@ class ShopItem extends Component {
     const dataKeyRate = this.contracts.ERC20TokenShop.methods["USDTETH"].cacheCall()
     const dataKeyDecimals = this.contracts.ERC20TokenShop.methods["getTokenDecimals"].cacheCall()
     const dataKeyStock = this.contracts.ERC20TokenShop.methods["getShopStock"].cacheCall()
+    const dataKeyTax = this.contracts.ERC20TokenShop.methods["getOracleTax"].cacheCall()
     //const dataKeyEvents = this.contracts.ERC20TokenShop.methods["events"].cacheCall()
 
-    this.setState({ dataKeyExchange, dataKeyRate, dataKeyDecimals, dataKeyStock })
+    this.setState({ dataKeyExchange, dataKeyRate, dataKeyDecimals, dataKeyStock, dataKeyTax })
 
     if (this.props.TokenShop.getShopStock[this.state.dataKeyStock] !== undefined) {
       this.setShopStock(this.props.TokenShop)
@@ -52,6 +55,7 @@ class ShopItem extends Component {
         this.setExchangeRate(this.props.TokenShop)
         this.setDecimals(this.props.TokenShop)
         this.setShopStock(this.props.TokenShop)
+        this.getOracleTaxRate(this.props.TokenShop)
       }
     }
   }
@@ -59,7 +63,6 @@ class ShopItem extends Component {
   handleInputChange(event) {
     this.setState({ [event.target.name]: event.target.value })
     this.setTXParamValue(event.target.value)
-    //this.fnTest(event.target.value)
   }
 
   handleBuyButton(event) {
@@ -67,18 +70,22 @@ class ShopItem extends Component {
   }
 
   setTXParamValue(_value) {
+    this.getOracleTaxRate()
     var BN = web3.utils.BN
     var weiDecimal = new BN(web3.utils.toWei('1', 'ether'))
     var tokenAmount = new BN(_value)
     var exchangeRate = new BN(this.state.exchangeRate)
-    var ethXRate = new BN(this.state.ethRate)
+    var oracleTax = new BN(this.state.oracleTax)
     var tokenDecimals = Math.pow(10,Number(this.state.tokenDecimals))
+    var ethXRate = new BN(this.state.ethRate)
+    var tokenBits = web3.utils.toBN(tokenDecimals)
     //console.log(web3.utils.toBN(tokenDecimals).toString())
     //console.log(web3.utils.isBN(web3.utils.toBN(tokenDecimals)))
-    var tokenBits = web3.utils.toBN(tokenDecimals)
-
+    if (ethXRate.toNumber() === 0) {
+      ethXRate = ethXRate.add(1)
+    }
     this.setState({
-      weiAmount: exchangeRate.mul(weiDecimal).mul(tokenAmount).div(ethXRate).div(tokenBits).toString()
+      weiAmount: exchangeRate.mul(weiDecimal).mul(tokenAmount).div(ethXRate).div(tokenBits).add(oracleTax).toString()
     })
   }
 
@@ -110,6 +117,14 @@ class ShopItem extends Component {
     if (contract.getShopStock[this.state.dataKeyStock] !== undefined && this.state.dataKeyStock !== null) {
       this.setState({
         shopStock: contract.getShopStock[this.state.dataKeyStock].value
+      })
+    }
+  }
+
+  getOracleTaxRate() {
+    if (this.props.TokenShop.getOracleTax[this.state.dataKeyTax] !== undefined && this.state.dataKeyTax !== null) {
+      this.setState({
+        oracleTax: this.props.TokenShop.getOracleTax[this.state.dataKeyTax].value
       })
     }
   }
@@ -147,6 +162,7 @@ class ShopItem extends Component {
       <p>Decimals: {this.state.tokenDecimals} </p>
       <p>Wei Amount: {this.state.weiAmount} </p>
       <p>Purchase Amount: {this.state.purchaseAmount}</p>
+      <p>Oracle Tax: {this.state.oracleTax}</p>
 
       </div>
     )

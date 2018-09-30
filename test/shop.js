@@ -171,7 +171,7 @@ contract ('Shop', function(accounts) {
       });
       //end test
     });
-    
+
     //end describe
   })
 
@@ -225,7 +225,7 @@ contract ('Shop', function(accounts) {
     //test ownership functionality
     it("Should fail to set Exchange Rate when not owner", function() {
       return expectedExceptionPromise(
-          () => shopInstance.setExchangeRate(rate05, {from: user01, gas: 3000000 }),
+          () => shopInstance.setExchangeRate(rate05, {from: user01, gas: 3000000}),
           3000000);
       //end test
     });
@@ -239,7 +239,7 @@ contract ('Shop', function(accounts) {
       .then(result => {
         assert.isTrue(result, "Contract is not paused");
         return expectedExceptionPromise(
-            () => shopInstance.setExchangeRate(rate05, {from: user01, gas: 3000000 }),
+            () => shopInstance.setExchangeRate(rate05, {from: user01, gas: 3000000}),
             3000000);
       });
       //end test
@@ -261,9 +261,9 @@ contract ('Shop', function(accounts) {
     });
 
     it("Should be able to set ETH xRate", function() {
-      return shopInstance.setETHXRate(ethXrate, {from: owner})
+      return shopInstance.setETHXRateOverride(ethXrate, {from: owner})
       .then(txObj => {
-        assert.strictEqual(txObj.logs[0].event, "LogSetETHXRate", "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].event, "LogSetETHXRateOverride", "Logs did not return correctly");
         assert.strictEqual(txObj.logs[0].args.eSender, owner, "Logs did not return correctly");
         assert.strictEqual(txObj.logs[0].args.eETHXRate.toNumber(), ethXrate, "Logs did not return correctly");
         return shopInstance.USDTETH({from: owner});
@@ -277,7 +277,7 @@ contract ('Shop', function(accounts) {
     //test ownership functionality
     it("Should fail to set ETH xRate if not owner", function() {
       return expectedExceptionPromise(
-          () => shopInstance.setETHXRate(ethXrate, {from: user01, gas: 3000000 }),
+          () => shopInstance.setETHXRateOverride(ethXrate, {from: user01, gas: 3000000}),
           3000000);
       //end test
     });
@@ -291,7 +291,7 @@ contract ('Shop', function(accounts) {
       .then(result => {
         assert.isTrue(result, "Contract is not paused");
         return expectedExceptionPromise(
-            () => shopInstance.setETHXRate(ethXrate, {from: owner, gas: 3000000 }),
+            () => shopInstance.setETHXRate(ethXrate, {from: owner, gas: 3000000}),
             3000000);
       });
       //end test
@@ -389,7 +389,7 @@ contract ('Shop', function(accounts) {
     //test ownership functionality
     it("Should fail to set deposit if not owner", function() {
       return expectedExceptionPromise(
-          () => shopInstance.deposit({from: user01, value: amount, gas: 3000000 }),
+          () => shopInstance.deposit({from: user01, value: amount, gas: 3000000}),
           3000000);
       //end test
     });
@@ -398,7 +398,7 @@ contract ('Shop', function(accounts) {
       return shopInstance.deposit({from: owner, value: amount})
       .then(() => {
       return expectedExceptionPromise(
-          () => shopInstance.withdraw(amount, {from: user01, gas: 3000000 }),
+          () => shopInstance.withdraw(amount, {from: user01, gas: 3000000}),
           3000000);
         });
       //end test
@@ -413,7 +413,7 @@ contract ('Shop', function(accounts) {
       .then(result => {
         assert.isTrue(result, "Contract should be paused");
         return expectedExceptionPromise(
-            () => shopInstance.deposit({from: user01, value: amount, gas: 3000000 }),
+            () => shopInstance.deposit({from: user01, value: amount, gas: 3000000}),
             3000000);
       });
       //end test
@@ -430,7 +430,7 @@ contract ('Shop', function(accounts) {
       .then(result => {
         assert.isTrue(result, "Contract should be paused");
         return expectedExceptionPromise(
-            () => shopInstance.withdraw(amount, {from: user01, gas: 3000000 }),
+            () => shopInstance.withdraw(amount, {from: user01, gas: 3000000}),
             3000000);
       });
       //end test
@@ -474,5 +474,11 @@ contract ('Shop', function(accounts) {
     //end describe
   });
 
+  it("Should not self destruct if not owner", function() {
+    return expectedExceptionPromise(
+        () => shopInstance.kill({from: user01, gas: 3000000}),
+        3000000);
+    //end test
+  });
 
 });

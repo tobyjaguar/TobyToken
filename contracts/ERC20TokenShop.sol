@@ -4,6 +4,8 @@ import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
+import "../ethereum-api/oraclizeAPI_0.4.25.sol";
+
 interface Token {
   function totalSupply() external view returns (uint256);
 
@@ -22,19 +24,24 @@ interface Token {
   function approve(address spender, uint256 value) external returns (bool);
 }
 
-contract ERC20TokenShop is Ownable, Pausable {
+contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
   using SafeMath for uint256;
 
   Token tokenContract;
 
   uint256 public exchangeRate;
   uint256 public USDTETH;
+  uint256 public oracleTax;
 
   event LogBuyToken(address eSender, uint256 eValue, uint256 eTokenAmount);
   event LogSetExchangeRate(address eSender, uint256 eRate, uint256 eExchangeRate);
   event LogSetETHXRate(address eSender, uint256 eETHXRate);
+  event LogSetETHXRateOverride(address eSender, uint256 eETHXRate);
+  event LogSetOracleTaxOverride(address eSender, uint256 eOracleTax);
   event LogDeposit(address eSender, uint256 eValue);
   event LogWithdraw(address eSender, uint256 eValue);
+  event LogSetETHXUpdated(address eSender, string eETHXRate);
+  event LogNewOraclizeQuery(string eOracleResponse);
 
   //Default exchange rate is $1/Token
   constructor(address _instance) public {
@@ -94,15 +101,35 @@ contract ERC20TokenShop is Ownable, Pausable {
     require(tokenContract.balanceOf(address(this)) > 0);
     //check not asking for more than stock
     require(tokenContract.balanceOf(address(this)) >= msg.value);
+    //set Oracle Tax
+    oracleTax = oraclize_getPrice("URL");
     //check value is at least 1 cross rate token bit unit per wei
-    require(msg.value >= exchangeRate.mul(USDTETH).div(10**18));
+    require(msg.value >= exchangeRate.mul(USDTETH).div(10**18).add(oracleTax));
+    //get updated ETH USD cross rate
+    updatePrice();
     //wei to token bit conversion via dollars
     //$ per ETH * ETH per wei * (1 / $ per tokenbit) = tokenbit per wei
     uint256 _amount;
-    _amount = msg.value.mul(exchangeRate).mul(USDTETH).div(10**(18));
+    _amount = msg.value.mul(exchangeRate).mul(USDTETH).div(10**(18)).sub(oracleTax);
     emit LogBuyToken(msg.sender, msg.value, _amount);
     tokenContract.transfer(msg.sender, _amount);
     return true;
+  }
+
+  //Oraclize implementation
+  function __callback(bytes32 myid, string result) {
+    require(msg.sender == oraclize_cbAddress());
+    USDTETH = parseInt(result, 0);
+    emit LogSetETHXUpdated(msg.sender, result);
+  }
+
+  function updatePrice()
+    whenNotPaused
+    public
+    payable
+  {
+    emit LogNewOraclizeQuery("Oraclize query was sent, standing by for the answer...");
+    oraclize_query("URL", "json(https://api.gdax.com/products/ETH-USD/ticker).price");
   }
 
   //Shop functions
@@ -112,6 +139,14 @@ contract ERC20TokenShop is Ownable, Pausable {
     returns (uint256)
   {
     return tokenContract.balanceOf(address(this));
+  }
+
+  function getOracleTax()
+    public
+    view
+    returns (uint256)
+  {
+    return oracleTax;
   }
 
   //Exchange rate in Dollars (i.e. Tokens per dollar)
@@ -125,7 +160,7 @@ contract ERC20TokenShop is Ownable, Pausable {
     return true;
   }
 
-  function setETHXRate(uint256 _dollars_per_eth)
+  function setETHXRateOverride(uint256 _dollars_per_eth)
     onlyOwner
     whenNotPaused
     public
@@ -133,6 +168,16 @@ contract ERC20TokenShop is Ownable, Pausable {
   {
     _setETHXRate(_dollars_per_eth);
     return true;
+  }
+
+  function setOracleTaxOverride(uint256 _oracleTax)
+    onlyOwner
+    whenNotPaused
+    public
+    returns (bool)
+  {
+      _setOracleTaxOverride(_oracleTax);
+      return true;
   }
 
   function deposit()
@@ -162,30 +207,31 @@ contract ERC20TokenShop is Ownable, Pausable {
 
   //Internal functions
   function _setExchangeRate(uint256 _dollars_per_token)
-    whenNotPaused
     internal
-    returns (bool)
   {
     uint256 _decimals = getTokenDecimals();
     _decimals = 10**(_decimals);
     exchangeRate = _decimals.div(_dollars_per_token);
     emit LogSetExchangeRate(msg.sender, _dollars_per_token, exchangeRate);
-    return true;
   }
 
   function _setETHXRate(uint256 _dollars_per_eth)
-    whenNotPaused
     internal
-    returns (bool)
   {
     USDTETH = _dollars_per_eth;
-    emit LogSetETHXRate(msg.sender, _dollars_per_eth);
-    return true;
+    emit LogSetETHXRateOverride(msg.sender, _dollars_per_eth);
+  }
+
+  function _setOracleTaxOverride(uint256 _oracleTax)
+    internal
+  {
+    oracleTax = _oracleTax;
+    emit LogSetOracleTaxOverride(msg.sender, _oracleTax);
   }
 
   function kill()
-    public
     onlyOwner
+    public
   {
     selfdestruct(owner());
   }
