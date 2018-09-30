@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import '../openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
+import '../openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 interface Token {
   function totalSupply() external view returns (uint256);
@@ -43,32 +43,52 @@ contract ERC20TokenShop is Ownable, Pausable {
   }
 
   //Token functions
-  function getTokenSupply() public view returns (uint256) {
+  function getTokenSupply()
+    public
+    view
+    returns (uint256)
+  {
     return tokenContract.totalSupply();
   }
 
-  function getTokenBalance(address _account) public view returns (uint256) {
+  function getTokenBalance(address _account)
+    public
+    view
+    returns (uint256)
+  {
     return tokenContract.balanceOf(_account);
   }
 
-  function getTokenName() public view returns (string) {
+  function getTokenName()
+    public
+    view
+    returns (string)
+  {
     return tokenContract.name();
   }
 
-  function getTokenSymbol() public view returns (string) {
+  function getTokenSymbol()
+    public
+    view
+    returns (string)
+  {
     return tokenContract.symbol();
   }
 
-  function getTokenDecimals() public view returns (uint8) {
+  function getTokenDecimals()
+    public
+    view
+    returns (uint8)
+  {
     return tokenContract.decimals();
   }
 
   //User functions
   function buyToken()
-  whenNotPaused
-  public
-  payable
-  returns (bool)
+    whenNotPaused
+    public
+    payable
+    returns (bool)
   {
     require(msg.value > 0);
     require(tokenContract.balanceOf(address(this)) > 0);
@@ -86,47 +106,51 @@ contract ERC20TokenShop is Ownable, Pausable {
   }
 
   //Shop functions
-  function getShopStock() public view returns (uint256) {
+  function getShopStock()
+    public
+    view
+    returns (uint256)
+  {
     return tokenContract.balanceOf(address(this));
   }
 
   //Exchange rate in Dollars (i.e. Tokens per dollar)
   function setExchangeRate(uint256 _dollars_per_token)
-  onlyOwner
-  whenNotPaused
-  public
-  returns (bool)
+    onlyOwner
+    whenNotPaused
+    public
+    returns (bool)
   {
     _setExchangeRate(_dollars_per_token);
     return true;
   }
 
   function setETHXRate(uint256 _dollars_per_eth)
-  onlyOwner
-  whenNotPaused
-  public
-  returns (bool)
+    onlyOwner
+    whenNotPaused
+    public
+    returns (bool)
   {
     _setETHXRate(_dollars_per_eth);
     return true;
   }
 
   function deposit()
-  onlyOwner
-  whenNotPaused
-  payable
-  public
-  returns (bool)
+    onlyOwner
+    whenNotPaused
+    payable
+    public
+    returns (bool)
   {
     emit LogDeposit(msg.sender, msg.value);
     return true;
   }
 
   function withdraw(uint256 _amount)
-  onlyOwner
-  whenNotPaused
-  public
-  returns (bool)
+    onlyOwner
+    whenNotPaused
+    public
+    returns (bool)
   {
     require(address(this).balance >= _amount);
     address _owner;
@@ -138,9 +162,9 @@ contract ERC20TokenShop is Ownable, Pausable {
 
   //Internal functions
   function _setExchangeRate(uint256 _dollars_per_token)
-  whenNotPaused
-  internal
-  returns (bool)
+    whenNotPaused
+    internal
+    returns (bool)
   {
     uint256 _decimals = getTokenDecimals();
     _decimals = 10**(_decimals);
@@ -150,13 +174,20 @@ contract ERC20TokenShop is Ownable, Pausable {
   }
 
   function _setETHXRate(uint256 _dollars_per_eth)
-  whenNotPaused
-  internal
-  returns (bool)
+    whenNotPaused
+    internal
+    returns (bool)
   {
     USDTETH = _dollars_per_eth;
     emit LogSetETHXRate(msg.sender, _dollars_per_eth);
     return true;
+  }
+
+  function kill()
+    public
+    onlyOwner
+  {
+    selfdestruct(owner());
   }
 
 

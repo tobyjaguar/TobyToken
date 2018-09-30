@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { AccountData, ContractData, ContractForm } from 'drizzle-react-components'
-import logo from '../../logo.png'
+import { AccountData, ContractData } from 'drizzle-react-components'
+//import logo from '../../logo.png'
 import PropTypes from 'prop-types'
 
 /* components */
@@ -87,9 +87,10 @@ class Home extends Component {
             <AccountData accountIndex="0" units="ether" precision="3" />
             <p><strong>Token Balance: </strong><ContractData contract="ERC20TokenShop" method="getTokenBalance" methodArgs={[this.props.accounts[0]]} /></p>
 
+            {/*
             <AccountData accountIndex="1" units="ether" precision="3" />
             <AccountData accountIndex="2" units="ether" precision="3" />
-
+            */}
             <br/><br/>
           </div>
 
