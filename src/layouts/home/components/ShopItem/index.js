@@ -6,6 +6,7 @@ import web3 from 'web3'
 
 //components
 import Button from '@material-ui/core/Button'
+import ContractState from '../ContractState'
 
 class ShopItem extends Component {
   constructor(props, context) {
@@ -13,6 +14,7 @@ class ShopItem extends Component {
 
     this.contracts = context.drizzle.contracts
 
+    this.handleShowStateButton = this.handleShowStateButton.bind(this)
     this.handleInputChange = this.handleInputChange.bind(this)
     this.handleBuyButton = this.handleBuyButton.bind(this)
     this.setTXParamValue = this.setTXParamValue.bind(this)
@@ -23,13 +25,14 @@ class ShopItem extends Component {
       dataKeyDecimals: null,
       dataKeyStock: null,
       dataKeyTax: null,
-      ethRate: 1,
-      exchangeRate: 1,
-      tokenDecimals: 1,
-      shopStock: 0,
-      oracleTax: 0,
+      showContractState: false,
+      ethRate: "1",
+      exchangeRate: "1",
+      tokenDecimals: "1",
+      shopStock: "0",
+      oracleTax: "0",
       weiAmount: '',
-      purchaseAmount: 0
+      purchaseAmount: "0"
     }
   }
 
@@ -62,7 +65,11 @@ class ShopItem extends Component {
 
   handleInputChange(event) {
     this.setState({ [event.target.name]: event.target.value })
-    this.setTXParamValue(event.target.value)
+    this.setTXParamValue(Math.ceil(event.target.value))
+  }
+
+  handleShowStateButton(event) {
+    this.setState({ showContractState: true })
   }
 
   handleBuyButton(event) {
@@ -129,20 +136,34 @@ class ShopItem extends Component {
     }
   }
 
-  render() {
-    //const contract = this.context.drizzle.store.getState().contracts.ERC20TokenShop
-    //console.log(this.context.drizzle.store.getState())
-    //console.log(this.state)
-    //console.log(this.context.drizzle.contracts.ERC20TokenShop)
-    //console.log(this.props.transactions)
-    //console.log(this.contracts.ERC20TokenShop.methods.getShopStock().call())
+  groomWei(weiValue) {
+    var factor = Math.pow(10, 4)
+    var balance = this.context.drizzle.web3.utils.fromWei(weiValue)
+    balance = Math.round(balance * factor) / factor
+    return balance
+  }
 
+  render() {
+    var oracleTaxGroomed = this.groomWei(this.state.oracleTax)
+    var shopStockGroomed = this.groomWei(this.state.shopStock)
+    var sendAmountGroomed = this.groomWei(this.state.weiAmount)
+
+    var contractInfo
+    if (this.state.showContractState) {
+      contractInfo =
+        <ContractState
+          ethRate={this.state.ethRate}
+          exchangeRate={this.state.exchangeRate}
+          tokenDecimals={this.state.tokenDecimals}
+          oracleTax={this.state.oracleTax}
+        />
+    }
     return (
       <div>
       <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
 
       <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
-      <p><strong>Store Stock: </strong> {this.state.shopStock}</p>
+      <p><strong>Store Stock: </strong> {shopStockGroomed}</p>
 
       <h3><p>Buy Tokens: </p></h3>
       <p>Dollar amount of Tokens:</p>
@@ -150,20 +171,17 @@ class ShopItem extends Component {
         <input name="purchaseAmount" type="number" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
         <Button type="Button" variant="contained" onClick={this.handleBuyButton}>Buy</Button>
       </form>
+      <p>Minimum $1</p>
+      <p>The oracle charges {oracleTaxGroomed} Ether to get the exchange rate </p>
       <br/><br/>
       {/*
       <ContractForm contract="ERC20TokenShop" method="buyToken" sendArgs={{from: this.props.accounts[0], value: this.state.weiAmount}} />
       */}
-
-
-      <p>State: </p>
-      <p>ETH Rate: {this.state.ethRate} </p>
-      <p>Exchange Rate: {this.state.exchangeRate} </p>
-      <p>Decimals: {this.state.tokenDecimals} </p>
-      <p>Wei Amount: {this.state.weiAmount} </p>
-      <p>Purchase Amount: {this.state.purchaseAmount}</p>
-      <p>Oracle Tax: {this.state.oracleTax}</p>
-
+      <p>Total: {sendAmountGroomed} ETH </p>
+      <p>Purchase Amount: {this.state.purchaseAmount} TOBY </p>
+      <br/>
+      <Button type="Button" variant="contained" onClick={this.handleShowStateButton}>More Info</Button>
+      {contractInfo}
       </div>
     )
   }

@@ -44,13 +44,7 @@ class Admin extends Component {
   }
 
   render() {
-    //var storedData = this.props.drizzleStatus.initialized ? this.contracts.SimpleStorage.methods.storedData.data() : 'Loading...'
-    //console.log(tokenName)
-    //console.log(this.props)
-    //console.log(this.contracts.ERC20TobyToken)
-    //console.log(this.state.txParams)
-    //sendArgs={[{from: this.props.accounts[0]}]}
-    //console.log(this.props.accounts)
+
     return (
       <div>
         <h2>Admin</h2>
@@ -94,11 +88,6 @@ class Admin extends Component {
         <p>Burn your tokens.</p>
         <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
 
-        {/*
-        <h3>Kill The Shop Contract</h3>
-        <p>kill this contract</p>
-        <ContractForm contract="ERC20TobyToken" method="kill" sendArgs={{from: this.props.accounts[0]}} />
-        */}
       </div>
     )
 

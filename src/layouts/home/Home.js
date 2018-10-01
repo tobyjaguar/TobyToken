@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { AccountData, ContractData } from 'drizzle-react-components'
+import { AccountData } from 'drizzle-react-components'
 //import logo from '../../logo.png'
 import PropTypes from 'prop-types'
 
@@ -7,8 +7,7 @@ import PropTypes from 'prop-types'
 import ShopItem from './components/ShopItem'
 import Admin from './components/Admin'
 import TXModal from './components/TXModal'
-//import TXObject from './components/TXObject'
-//import LogIn from './components/LogIn'
+import Button from '@material-ui/core/Button'
 
 class Home extends Component {
   constructor(props, context) {
@@ -22,19 +21,24 @@ class Home extends Component {
     this.state = {
         loggedIn: false,
         dataKeyOwner: null,
+        dataKeyTknBalance: null,
         shopKeeper: '',
+        tokenBalance: ''
     }
   }
 
   componentDidMount() {
     const dataKeyOwner = this.contracts.ERC20TokenShop.methods["owner"].cacheCall()
-    this.setState({dataKeyOwner})
-    this.setShopKeeper(this.props.TokenShop)
+    const dataKeyTknBalance = this.contracts.ERC20TokenShop.methods["getTokenBalance"].cacheCall(this.props.accounts[0])
+    this.setState({dataKeyOwner, dataKeyTknBalance})
+    this.setShopKeeper()
+    this.setTokenBalance()
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (this.props.TokenShop !== prevProps.TokenShop) {
-      this.setShopKeeper(this.props.TokenShop)
+      this.setShopKeeper()
+      this.setTokenBalance()
     }
   }
 
@@ -42,10 +46,18 @@ class Home extends Component {
     this.setState({ [event.target.name]: event.target.value })
   }
 
-  setShopKeeper(contract) {
-    if (contract.owner[this.state.dataKeyOwner] !== undefined && this.state.dataKeyOwner !== null) {
+  setShopKeeper() {
+    if (this.props.TokenShop.owner[this.state.dataKeyOwner] !== undefined && this.state.dataKeyOwner !== null) {
       this.setState({
-        shopKeeper: contract.owner[this.state.dataKeyOwner].value
+        shopKeeper: this.props.TokenShop.owner[this.state.dataKeyOwner].value
+      })
+    }
+  }
+
+  setTokenBalance() {
+    if (this.props.TokenShop.getTokenBalance[this.state.dataKeyTknBalance] !== undefined && this.state.dataKeyTknBalance !== null) {
+      this.setState({
+        tokenBalance: this.props.TokenShop.getTokenBalance[this.state.dataKeyTknBalance].value
       })
     }
   }
@@ -58,19 +70,25 @@ class Home extends Component {
     }
   }
 
+  groomWei(weiValue) {
+    var factor = Math.pow(10, 4)
+    var balance = this.context.drizzle.web3.utils.fromWei(weiValue)
+    balance = Math.round(balance * factor) / factor
+    return balance
+  }
+
   render() {
+    var tknBalanceGroomed = this.groomWei(this.state.tokenBalance)
+
     var displayAdmin
     if (this.state.loggedIn) {
       displayAdmin = <Admin />
     }
-    //console.log(JSON.stringify(this.props, null, 4))
-    //const tokenContract = this.context.drizzle.store.getState().contracts.ERC20TobyToken
-    //console.log(this.props.transactions[stackId])
-    //console.log(this.state.loggedIn)
-    //console.log(this.state.shopKeeper)
+
     return (
       <main className="container">
         <div className="pure-g">
+
           {/*
           <div className="pure-u-1-1 header">
             <img src={logo} alt="drizzle-logo" />
@@ -83,7 +101,7 @@ class Home extends Component {
           <div className="pure-u-1-1">
             <h2>Active Account</h2>
             <AccountData accountIndex="0" units="ether" precision="3" />
-            <p><strong>Token Balance: </strong><ContractData contract="ERC20TokenShop" method="getTokenBalance" methodArgs={[this.props.accounts[0]]} /></p>
+            <p><strong>Token Balance: </strong> {tknBalanceGroomed} TOBY</p>
 
             {/*
             <AccountData accountIndex="1" units="ether" precision="3" />
@@ -92,22 +110,6 @@ class Home extends Component {
             <br/><br/>
           </div>
 
-          {/*
-          <div className="pure-u-1-1">
-            <h2>SimpleStorage</h2>
-            <p>This shows a simple ContractData component with no arguments, along with a form to set its value.</p>
-            <p><strong>Stored Value</strong>: </p>
-            <form className="pure-form pure-form-stacked">
-              <input name="storageAmount" type="number" value={this.state.storageAmount} onChange={this.handleInputChange} />
-              <button className="pure-button" type="button" onClick={this.handleSetButton}>Store Value of {this.state.storageAmount}</button>
-            </form>
-
-            <br/><br/>
-          </div>
-          */}
-
-          {/*tx Return Object*/}
-            {/*{txResult}*/}
             <TXModal />
           <div className="pure-u-1-1">
             <h2>TokenShop</h2>
@@ -120,9 +122,7 @@ class Home extends Component {
           <div className="pure-u-1-1">
             {displayAdmin}
             <br/>
-            <form className="pure-form pure-form-stacked">
-              <button className="pure-button" type="button" onClick={this.handleLogInButton}> Login </button>
-            </form>
+            <Button type="Button" variant="contained" onClick={this.handleLogInButton}> Admin </Button>
             <br/><br/>
           </div>
 
