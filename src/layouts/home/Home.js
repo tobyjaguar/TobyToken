@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { AccountData } from 'drizzle-react-components'
-//import logo from '../../logo.png'
+import logo from '../../assets/toby.png'
 import PropTypes from 'prop-types'
 
 /* components */
@@ -89,14 +89,13 @@ class Home extends Component {
       <main className="container">
         <div className="pure-g">
 
-          {/*
-          <div className="pure-u-1-1 header">
-            <img src={logo} alt="drizzle-logo" />
-            <h1>Drizzle Example</h1>
 
-            <br/><br/>
+          <div className="pure-u-1-1 header">
+            {/*<img src={logo} alt="toby'stoken-store"/>*/}
+            <h1>Token Shop</h1>
+
           </div>
-          */}
+
 
           <div className="pure-u-1-1">
             <h2>Active Account</h2>
@@ -107,23 +106,20 @@ class Home extends Component {
             <AccountData accountIndex="1" units="ether" precision="3" />
             <AccountData accountIndex="2" units="ether" precision="3" />
             */}
-            <br/><br/>
+            <br/>
           </div>
 
             <TXModal />
           <div className="pure-u-1-1">
-            <h2>TokenShop</h2>
-            <p>Shop Address: {this.contracts.ERC20TokenShop.address} </p>
             <ShopItem />
-
-            <br/><br/>
+            <br/>
           </div>
 
           <div className="pure-u-1-1">
             {displayAdmin}
             <br/>
             <Button type="Button" variant="contained" onClick={this.handleLogInButton}> Admin </Button>
-            <br/><br/>
+            <br/>
           </div>
 
         </div>

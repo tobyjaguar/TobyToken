@@ -173,7 +173,7 @@ class ShopItem extends Component {
       </form>
       <p>Minimum $1</p>
       <p>The oracle charges {oracleTaxGroomed} Ether to get the exchange rate </p>
-      <br/><br/>
+
       {/*
       <ContractForm contract="ERC20TokenShop" method="buyToken" sendArgs={{from: this.props.accounts[0], value: this.state.weiAmount}} />
       */}

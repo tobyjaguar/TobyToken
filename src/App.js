@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Route } from 'react-router'
 import HomeContainer from './layouts/home/HomeContainer'
+import MyAppBar from './layouts/AppBar'
 
 // Styles
 import './css/oswald.css'
@@ -12,7 +13,8 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Route exact path="/" component={HomeContainer}/>
+        <MyAppBar />
+        <Route exact path="/" component={HomeContainer} />
       </div>
     );
   }
