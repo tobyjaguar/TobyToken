@@ -1,8 +1,16 @@
 import React, { Component } from 'react'
-import { ContractData, ContractForm } from 'drizzle-react-components'
 import { drizzleConnect } from 'drizzle-react'
 import PropTypes from 'prop-types'
 
+//components
+import { ContractData, ContractForm } from 'drizzle-react-components'
+import Paper from '@material-ui/core/Paper'
+
+//inline styles
+const styles = {
+    backgroundColor: '#F9DBDB',
+    padding: 20
+}
 
 class Admin extends Component {
   constructor(props, context) {
@@ -47,47 +55,62 @@ class Admin extends Component {
 
     return (
       <div>
-        <h2>Admin</h2>
-        <p>Shop Address: {this.contracts.ERC20TokenShop.address} </p>
-        <p>Token Address: {this.contracts.ERC20TobyToken.address} </p>
+        <Paper style={styles}>
+          <h2>Admin</h2>
+          <p>Shop Address: {this.contracts.ERC20TokenShop.address} </p>
+          <p>Token Address: {this.contracts.ERC20TobyToken.address} </p>
 
-        <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
+          <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
 
-        <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
-        <p><strong>Store Stock: </strong> {this.state.shopStock}</p>
-        <p><strong>Exchange Rate: </strong> <ContractData contract="ERC20TokenShop" method="exchangeRate" /></p>
-        <p><strong>ETH Cross Rate: </strong> <ContractData contract="ERC20TokenShop" method="USDTETH" /></p>
+          <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
+          <p><strong>Store Stock: </strong> {this.state.shopStock}</p>
+          <p><strong>Exchange Rate: </strong> <ContractData contract="ERC20TokenShop" method="exchangeRate" /></p>
+          <p><strong>ETH Cross Rate: </strong> <ContractData contract="ERC20TokenShop" method="USDTETH" /></p>
 
-        <h3><p>Store Stats</p></h3>
-        <strong>Set Exchange Rate: </strong>
-        <div><ContractForm contract="ERC20TokenShop" method="setExchangeRate" labels={['Dollars per Token']} /></div>
-        <br/>
-        <strong>Set ETH Exchange Rate: </strong>
-        <div><ContractForm contract="ERC20TokenShop" method="setETHXRate" labels={['Dollars per ETH']} /></div>
-        <br/>
-        <strong>Withdraw: </strong>
-        <div><ContractForm contract="ERC20TokenShop" method="withdraw" labels={['Amount']} /></div>
-        <br/>
+          <h3><p>Store Stats</p></h3>
+          <strong>Set Exchange Rate: </strong>
+          <div><ContractForm contract="ERC20TokenShop" method="setExchangeRate" labels={['Dollars per Token']} /></div>
+          <br/>
+          <strong>Set ETH Exchange Rate Override: </strong>
+          <div><ContractForm contract="ERC20TokenShop" method="setETHXRateOverride" labels={['Dollars per ETH']} /></div>
+          <br/>
+          <strong>Set Oraclize Price Type: </strong>
+          <br/>
+          (***no quotes***)
+          <div><ContractForm contract="ERC20TokenShop" method="setOraclizePriceType" labels={['URL']} /></div>
+          <br/>
+          <strong>Set Oralce URL Lookup: </strong>
+          <br/>
+          (***no quotes***)
+          <div><ContractForm contract="ERC20TokenShop" method="setQueryURL" labels={['json(https://)']} /></div>
+          <br/>
 
-        <h3>Deposit</h3>
-        <p>Add funds</p>
-        <form className="pure-form pure-form-stacked">
-          <input name="depositAmount" type="number" value={this.state.depositAmount} onChange={this.handleInputChange} />
-        </form>
-        <ContractForm contract="ERC20TokenShop" method="deposit" sendArgs={{from: this.props.accounts[0], value: this.state.depositAmount}} />
+          <strong>Withdraw: </strong>
+          <div><ContractForm contract="ERC20TokenShop" method="withdraw" labels={['Amount']} /></div>
+          <br/>
 
-        <h3>Get Oracle</h3>
-        <p>Ask the oracle for the price</p>
-        <ContractForm contract="ERC20TokenShop" method="updatePrice" />
+          <strong>Deposit</strong>
+          <p>Add funds</p>
+          <form className="pure-form pure-form-stacked">
+            <input name="depositAmount" type="number" value={this.state.depositAmount} onChange={this.handleInputChange} />
+          </form>
+          <ContractForm contract="ERC20TokenShop" method="deposit" sendArgs={{from: this.props.accounts[0], value: this.state.depositAmount}} />
+          <br/>
 
-        <h3><p>Allocate Tokens to the Shop: </p></h3>
-        <p>Mint Tokens to the store:</p>
-        <ContractForm contract="ERC20TobyToken" method="mint" labels={['Recipient', 'Amount to Mint']} />
+          <strong><p>Update Oracle</p></strong>
+          <p>Update the price from the Oracle. **This costs money!</p>
+          <ContractForm contract="ERC20TokenShop" method="updatePrice" />
+          <br/>
 
-        <h3>Burn Tokens</h3>
-        <p>Burn your tokens.</p>
-        <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
+          <strong><p>Allocate Tokens to the Shop:</p></strong>
+          <p>Mint Tokens to the store:</p>
+          <ContractForm contract="ERC20TobyToken" method="mint" labels={['Recipient', 'Amount to Mint']} />
+          <br/>
 
+          <strong><p>Burn Tokens</p></strong>
+          <p>Burn your tokens.</p>
+          <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
+      </Paper>
       </div>
     )
 

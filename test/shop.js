@@ -173,7 +173,7 @@ contract ('Shop', function(accounts) {
     });
 
     //end describe
-  })
+  });
 
   describe("Set Exchange Rate", function() {
     var rate01 = 1;
@@ -245,6 +245,122 @@ contract ('Shop', function(accounts) {
       //end test
     });
 
+    //end describe
+  });
+
+  describe("Set ETH to Dollar Rate functionality", function() {
+    var ethXrate = 200;
+
+    it("Should be initialized to zero", function() {
+      return shopInstance.USDTETH({from: owner})
+      .then(result => {
+        assert.strictEqual(result.toNumber(), 0, "USDTETH param did not return correctly");
+      });
+      //end test
+    });
+
+    it("Should be able to set ETH xRate", function() {
+      return shopInstance.setETHXRateOverride(ethXrate, {from: owner})
+      .then(txObj => {
+        assert.strictEqual(txObj.logs[0].event, "LogSetETHXRateOverride", "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eSender, owner, "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eETHXRate.toNumber(), ethXrate, "Logs did not return correctly");
+        return shopInstance.USDTETH({from: owner});
+      })
+      .then(result => {
+        assert.strictEqual(result.toNumber(), ethXrate, "Stock param did not return correctly");
+      });
+      //end test
+    });
+
+    //test ownership functionality
+    it("Should fail to set ETH xRate if not owner", function() {
+      return expectedExceptionPromise(
+          () => shopInstance.setETHXRateOverride(ethXrate, {from: user01, gas: 3000000}),
+          3000000);
+      //end test
+    });
+
+    //test pausable functionality
+    it("Should fail to set Shop Stock if paused", function() {
+      return shopInstance.pause({from: owner})
+      .then(() => {
+        return shopInstance.paused({from: owner});
+      })
+      .then(result => {
+        assert.isTrue(result, "Contract is not paused");
+        return expectedExceptionPromise(
+            () => shopInstance.setETHXRateOverride(ethXrate, {from: owner, gas: 3000000}),
+            3000000);
+      });
+      //end test
+    });
+
+    //end describe
+  });
+
+  describe("Set Tax Rate Override", function() {
+    var taxRate01 = 1*decimals/100;
+    var taxRate05 = 5*decimals/1000;
+
+    it("Should get default Tax Rate", function() {
+      return shopInstance.oracleTax({from: owner})
+      .then(result => {
+        assert.strictEqual(result.toNumber(), 0, "Tax Rate param did not return correctly");
+      });
+      //end test
+    });
+
+    it("Should set tax rate to 10000000000000000", function() {
+      return shopInstance.setOracleTaxOverride(taxRate01, {from: owner})
+      .then(txObj => {
+        assert.strictEqual(txObj.logs[0].event, "LogSetOracleTaxOverride", "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eSender, owner, "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eOracleTax.toNumber(), taxRate01, "Logs did not return correctly");
+        return shopInstance.oracleTax({from: owner});
+      })
+      .then(result => {
+        assert.strictEqual(result.toNumber(), taxRate01, "Tax Rate param did not update correctly");
+      });
+      //end test
+    });
+
+    it("Should set tax rate to 5000000000000000", function() {
+      return shopInstance.setOracleTaxOverride(taxRate05, {from: owner})
+      .then(txObj => {
+        assert.strictEqual(txObj.logs[0].event, "LogSetOracleTaxOverride", "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eSender, owner, "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eOracleTax.toNumber(), taxRate05, "Logs did not return correctly");
+        return shopInstance.oracleTax({from: owner});
+      })
+      .then(result => {
+        assert.strictEqual(result.toNumber(), taxRate05, "Tax Rate param did not update correctly");
+      });
+      //end test
+    });
+
+    //test ownership functionality
+    it("Should fail to set Tax Rate when not owner", function() {
+      return expectedExceptionPromise(
+          () => shopInstance.setOracleTaxOverride(taxRate05, {from: user01, gas: 3000000}),
+          3000000);
+      //end test
+    });
+
+    //test pausable functionality
+    it("Should fail to set Exchange Rate if paused", function() {
+      return shopInstance.pause({from: owner})
+      .then(() => {
+        return shopInstance.paused({from: owner});
+      })
+      .then(result => {
+        assert.isTrue(result, "Contract is not paused");
+        return expectedExceptionPromise(
+            () => shopInstance.setOracleTaxOverride(taxRate05, {from: user01, gas: 3000000}),
+            3000000);
+      });
+      //end test
+    });
 
     //end describe
   });
@@ -291,7 +407,110 @@ contract ('Shop', function(accounts) {
       .then(result => {
         assert.isTrue(result, "Contract is not paused");
         return expectedExceptionPromise(
-            () => shopInstance.setETHXRate(ethXrate, {from: owner, gas: 3000000}),
+            () => shopInstance.setETHXRateOverride(ethXrate, {from: owner, gas: 3000000}),
+            3000000);
+      });
+      //end test
+    });
+
+    //end describe
+  });
+
+  describe("Changing Oracle parameters", function() {
+    var oraclizePriceType = "URL";
+    var oraclizePriceType2 = "someotherstring";
+    var queryURL = "json(https://api.gdax.com/products/ETH-USD/ticker).price";
+    var query2URL = "json(https://bittrex.com/api/v1.1/public/getticker?market=USDT-ETH).result.Last";
+
+    it("Should set oraclizePriceType ", function() {
+      return shopInstance.setOraclizePriceType(oraclizePriceType, {from: owner})
+      .then(txObj => {
+        assert.strictEqual(txObj.logs[0].event, "LogSetOraclizePriceType", "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eSender, owner, "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eOraclizePriceType, oraclizePriceType, "Logs did not return correctly");
+        return shopInstance.oraclizePriceType({from: owner});
+      })
+      .then(result => {
+        assert.strictEqual(result, oraclizePriceType, "OraclizePriceType param did not return correctly");
+        return shopInstance.setOraclizePriceType(oraclizePriceType2, {from: owner});
+      })
+      .then(txObj => {
+        assert.strictEqual(txObj.logs[0].event, "LogSetOraclizePriceType", "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eSender, owner, "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eOraclizePriceType, oraclizePriceType2, "Logs did not return correctly");
+        return shopInstance.oraclizePriceType({from: owner});
+      })
+      .then(result => {
+        assert.strictEqual(result, oraclizePriceType2, "OraclizePriceType2 param did not return correctly");
+      });
+      //end test
+    });
+
+    it("Should set queryURL", function() {
+      return shopInstance.setQueryURL(queryURL, {from: owner})
+      .then(txObj => {
+        assert.strictEqual(txObj.logs[0].event, "LogSetQueryURL", "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eSender, owner, "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eQueryURL, queryURL, "Logs did not return correctly");
+        return shopInstance.queryURL({from: owner});
+      })
+      .then(result => {
+        assert.strictEqual(result, queryURL, "Exchange Rate param did not update correctly");
+        return shopInstance.setQueryURL(query2URL, {from: owner});
+      })
+      .then(txObj => {
+        assert.strictEqual(txObj.logs[0].event, "LogSetQueryURL", "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eSender, owner, "Logs did not return correctly");
+        assert.strictEqual(txObj.logs[0].args.eQueryURL, query2URL, "Logs did not return correctly");
+        return shopInstance.queryURL({from: owner});
+      })
+      .then(result => {
+        assert.strictEqual(result, query2URL, "Exchange Rate param did not update correctly");
+      });
+      //end test
+    });
+
+
+    //test ownership functionality
+    it("Should fail to set Ocraclize PriceType when not owner", function() {
+      return expectedExceptionPromise(
+          () => shopInstance.setOraclizePriceType(oraclizePriceType, {from: user01, gas: 3000000}),
+          3000000);
+      //end test
+    });
+
+    it("Should fail to set Query URL when not owner", function() {
+      return expectedExceptionPromise(
+          () => shopInstance.setQueryURL(queryURL, {from: user01, gas: 3000000}),
+          3000000);
+      //end test
+    });
+
+    //test pausable functionality
+    it("Should fail to set Oraclize PriceType if paused", function() {
+      return shopInstance.pause({from: owner})
+      .then(() => {
+        return shopInstance.paused({from: owner});
+      })
+      .then(result => {
+        assert.isTrue(result, "Contract is not paused");
+        return expectedExceptionPromise(
+            () => shopInstance.setOraclizePriceType(oraclizePriceType, {from: user01, gas: 3000000}),
+            3000000);
+      });
+      //end test
+    });
+
+    //test pausable functionality
+    it("Should fail to set Query URL if paused", function() {
+      return shopInstance.pause({from: owner})
+      .then(() => {
+        return shopInstance.paused({from: owner});
+      })
+      .then(result => {
+        assert.isTrue(result, "Contract is not paused");
+        return expectedExceptionPromise(
+            () => shopInstance.setQueryURL(queryURL, {from: user01, gas: 3000000}),
             3000000);
       });
       //end test
@@ -385,7 +604,6 @@ contract ('Shop', function(accounts) {
       //end test
     });
 
-
     //test ownership functionality
     it("Should fail to set deposit if not owner", function() {
       return expectedExceptionPromise(
@@ -438,14 +656,14 @@ contract ('Shop', function(accounts) {
 
     //end describe
   });
-
+/**
   describe("Buying tokens from the Shop Contract", function() {
     var amount = 1000;
     var tokenAmount;
     var usdtethRate = 200;
 
     beforeEach(function() {
-      return shopInstance.setETHXRate(usdtethRate, {from: owner});
+      return shopInstance.setETHXRateOverride(usdtethRate, {from: owner});
     });
 
     it("Should be able to buy tokens from the Shop", function() {
@@ -473,7 +691,7 @@ contract ('Shop', function(accounts) {
 
     //end describe
   });
-
+  **/
   it("Should not self destruct if not owner", function() {
     return expectedExceptionPromise(
         () => shopInstance.kill({from: user01, gas: 3000000}),

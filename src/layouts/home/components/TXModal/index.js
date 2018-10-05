@@ -3,12 +3,21 @@ import { drizzleConnect } from 'drizzle-react'
 import PropTypes from 'prop-types'
 
 //components
+import Paper from '@material-ui/core/Paper'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import Button from '@material-ui/core/Button'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
+
+//inline styles
+const styles = {
+  style: {
+    backgroundColor: '#FFF5F5',
+    padding: 20
+  }
+}
 
 class TXModal extends Component {
   constructor(props, context) {
@@ -57,10 +66,11 @@ class TXModal extends Component {
   }
 
   render() {
-    //console.log(this.props.transactionStack)
+
     return (
       <div>
-        <Dialog open={this.state.open} >
+
+        <Dialog PaperProps={styles} open={this.state.open} >
           <DialogTitle id="tx-dialog">Transaction:</DialogTitle>
           <List>
             <ListItem>
@@ -73,7 +83,7 @@ class TXModal extends Component {
               <ListItemText secondary={this.state.txHash} />
             </ListItem>
             <ListItem>
-              <Button variant="outlined" onClick={this.handleClose} >Close</Button>
+              <Button variant="contained" onClick={this.handleClose} >Close</Button>
             </ListItem>
           </List>
         </Dialog>

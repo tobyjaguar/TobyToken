@@ -10,9 +10,20 @@ import '../../css/oswald.css'
 import '../../css/open-sans.css'
 import '../../css/pure-min.css'
 import '../../App.css'
-const style = {
+
+//inline styles
+const style01 = {
+  backgroundColor: '#F9DBDB',
+  color: 'black',
   fontFamily: "'Open Sans', sans-serif",
   fontSize: "14pt"
+}
+
+const style02 = {
+  color: 'black',
+  fontFamily: "'Open Sans', sans-serif",
+  fontSize: "14pt",
+  marginLeft: 'auto'
 }
 
 class MyAppBar extends Component {
@@ -28,9 +39,9 @@ class MyAppBar extends Component {
   }
 
   componentDidMount() {
-    //const dataKeyTknBalance = this.contracts.ERC20TokenShop.methods["getTokenBalance"].cacheCall(this.props.accounts[0])
-    //this.setState({dataKeyTknBalance})
-    //this.setTokenBalance()
+    const dataKeyTknBalance = this.contracts.ERC20TokenShop.methods["getTokenBalance"].cacheCall(this.props.accounts[0])
+    this.setState({dataKeyTknBalance})
+    this.setTokenBalance()
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -58,10 +69,13 @@ class MyAppBar extends Component {
     var tknBalanceGroomed = this.groomWei(this.state.tokenBalance)
 
     return (
-          <AppBar className="pure-u-1-1" position="static" color="primary">
+          <AppBar style={style01} position="static">
             <Toolbar>
-              <Typography style={style} variant="title" color="inherit">
+              <Typography style={style01} variant="title" color="inherit">
                   Contract Address: {this.contracts.ERC20TokenShop.address}
+              </Typography>
+              <Typography style={style02} >
+                  Balance: {tknBalanceGroomed} TOBY
               </Typography>
               </Toolbar>
             </AppBar>

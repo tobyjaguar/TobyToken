@@ -7,6 +7,14 @@ import web3 from 'web3'
 //components
 import Button from '@material-ui/core/Button'
 import ContractState from '../ContractState'
+import Paper from '@material-ui/core/Paper'
+
+//inline styles
+const styles = {
+    backgroundColor: '#F9DBDB',
+    padding: 20
+
+}
 
 class ShopItem extends Component {
   constructor(props, context) {
@@ -86,10 +94,8 @@ class ShopItem extends Component {
     var tokenDecimals = Math.pow(10,Number(this.state.tokenDecimals))
     var ethXRate = new BN(this.state.ethRate)
     var tokenBits = web3.utils.toBN(tokenDecimals)
-    //console.log(web3.utils.toBN(tokenDecimals).toString())
-    //console.log(web3.utils.isBN(web3.utils.toBN(tokenDecimals)))
     if (ethXRate.toNumber() === 0) {
-      ethXRate = ethXRate.add(1)
+      ethXRate = web3.utils.toBN(1)
     }
     this.setState({
       weiAmount: exchangeRate.mul(weiDecimal).mul(tokenAmount).div(ethXRate).div(tokenBits).add(oracleTax).toString()
@@ -144,6 +150,7 @@ class ShopItem extends Component {
   }
 
   render() {
+
     var oracleTaxGroomed = this.groomWei(this.state.oracleTax)
     var shopStockGroomed = this.groomWei(this.state.shopStock)
     var sendAmountGroomed = this.groomWei(this.state.weiAmount)
@@ -160,28 +167,30 @@ class ShopItem extends Component {
     }
     return (
       <div>
-      <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
+        <Paper style={styles} elevation={5}>
+          <p><strong>Name: </strong> <ContractData contract="ERC20TokenShop" method="getTokenName" /></p>
 
-      <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
-      <p><strong>Store Stock: </strong> {shopStockGroomed}</p>
+          <p><strong>Symbol: </strong> <ContractData contract="ERC20TokenShop" method="getTokenSymbol" /></p>
+          <p><strong>Store Stock: </strong> {shopStockGroomed}</p>
 
-      <h3><p>Buy Tokens: </p></h3>
-      <p>Dollar amount of Tokens:</p>
-      <form className="pure-form pure-form-stacked">
-        <input name="purchaseAmount" type="number" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
-        <Button type="Button" variant="contained" onClick={this.handleBuyButton}>Buy</Button>
-      </form>
-      <p>Minimum $1</p>
-      <p>The oracle charges {oracleTaxGroomed} Ether to get the exchange rate </p>
+          <h3><p>Buy Tokens: </p></h3>
+          <p>Dollar amount of Tokens:</p>
+          <form className="pure-form pure-form-stacked">
+            <input name="purchaseAmount" type="number" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
+            <Button type="Button" variant="contained" onClick={this.handleBuyButton}>Buy</Button>
+          </form>
+          <p>Minimum $1</p>
+          <p>The oracle charges {oracleTaxGroomed} Ether to get the exchange rate </p>
 
       {/*
       <ContractForm contract="ERC20TokenShop" method="buyToken" sendArgs={{from: this.props.accounts[0], value: this.state.weiAmount}} />
       */}
-      <p>Total: {sendAmountGroomed} ETH </p>
-      <p>Purchase Amount: {this.state.purchaseAmount} TOBY </p>
-      <br/>
-      <Button type="Button" variant="contained" onClick={this.handleShowStateButton}>More Info</Button>
-      {contractInfo}
+        <p>Total: {sendAmountGroomed} ETH </p>
+        <p>Purchase Amount: {this.state.purchaseAmount} TOBY </p>
+        <br/>
+        <Button type="Button" variant="contained" onClick={this.handleShowStateButton}>More Info</Button>
+        {contractInfo}
+      </Paper>
       </div>
     )
   }

@@ -1,13 +1,24 @@
 import React, { Component } from 'react'
-import { AccountData } from 'drizzle-react-components'
-import logo from '../../assets/toby.png'
+import logo from '../../assets/Shop.jpg'
 import PropTypes from 'prop-types'
 
 /* components */
+import Account from './components/Account'
 import ShopItem from './components/ShopItem'
+import Paper from '@material-ui/core/Paper'
+import Typography from '@material-ui/core/Typography'
 import Admin from './components/Admin'
 import TXModal from './components/TXModal'
 import Button from '@material-ui/core/Button'
+
+//inline styles
+const styles = {
+  backgroundColor: '#F9DBDB',
+  color: 'black',
+  fontFamily: "'Open Sans', sans-serif",
+  fontSize: "14pt",
+  padding: 30
+}
 
 class Home extends Component {
   constructor(props, context) {
@@ -16,10 +27,14 @@ class Home extends Component {
     this.contracts = context.drizzle.contracts
 
     this.handleInputChange = this.handleInputChange.bind(this)
-    this.handleLogInButton = this.handleLogInButton.bind(this)
+    this.handleAccountButton = this.handleAccountButton.bind(this)
+    this.handleShopButton = this.handleShopButton.bind(this)
+    this.handleAdminButton = this.handleAdminButton.bind(this)
 
     this.state = {
-        loggedIn: false,
+        showAdmin: false,
+        showShop: false,
+        showAccount: false,
         dataKeyOwner: null,
         dataKeyTknBalance: null,
         shopKeeper: '',
@@ -62,11 +77,23 @@ class Home extends Component {
     }
   }
 
-  handleLogInButton() {
+  handleAccountButton() {
+      this.setState({
+        showAccount: !this.state.showAccount
+      })
+  }
+
+  handleShopButton() {
+    this.setState({
+      showShop: !this.state.showShop
+    })
+  }
+
+  handleAdminButton() {
     var owner
     owner = this.props.accounts[0]
     if (this.state.shopKeeper === owner) {
-      this.setState({loggedIn: true})
+      this.setState({showAdmin: true})
     }
   }
 
@@ -80,49 +107,63 @@ class Home extends Component {
   render() {
     var tknBalanceGroomed = this.groomWei(this.state.tokenBalance)
 
+    var displayAccount
     var displayAdmin
-    if (this.state.loggedIn) {
+    var displayShop
+
+    if (this.state.showAccount) {
+      displayAccount = <Account tknBalance={tknBalanceGroomed} />
+    }
+
+    if (this.state.showShop) {
+      displayShop = <ShopItem />
+    }
+
+    if (this.state.showAdmin) {
       displayAdmin = <Admin />
     }
 
     return (
       <main className="container">
-        <div className="pure-g">
 
 
           <div className="pure-u-1-1 header">
-            {/*<img src={logo} alt="toby'stoken-store"/>*/}
-            <h1>Token Shop</h1>
-
+            <img src={logo} alt="toby-token-shop" width={500} />
           </div>
 
+            <Paper>
+              <Typography style={styles}>
+              This is a token shop where you can purchase TOBY tokens for Ether.
+              Each TOBY token costs $1, and is purchased in Ether. The goal is to
+              buy TOBY tokens here and then sell them back to Toby in person.
+              TOBY is an ERC20 token. Please have MetaMask enabled.
+              </Typography>
+            </Paper>
 
-          <div className="pure-u-1-1">
-            <h2>Active Account</h2>
-            <AccountData accountIndex="0" units="ether" precision="3" />
-            <p><strong>Token Balance: </strong> {tknBalanceGroomed} TOBY</p>
+          <TXModal />
 
-            {/*
-            <AccountData accountIndex="1" units="ether" precision="3" />
-            <AccountData accountIndex="2" units="ether" precision="3" />
-            */}
             <br/>
-          </div>
-
-            <TXModal />
-          <div className="pure-u-1-1">
-            <ShopItem />
+            {displayShop}
             <br/>
-          </div>
+            <Button type="Button" variant="contained" onClick={this.handleShopButton}> Buy Token </Button>
+            <br/>
 
-          <div className="pure-u-1-1">
+            <br/>
+            {displayAccount}
+            <br/>
+            <Button type="Button" variant="contained" onClick={this.handleAccountButton}> Account Info </Button>
+            <br/>
+
+            <br/>
             {displayAdmin}
             <br/>
-            <Button type="Button" variant="contained" onClick={this.handleLogInButton}> Admin </Button>
+            <Button type="Button" variant="contained" onClick={this.handleAdminButton}> Admin </Button>
             <br/>
-          </div>
+            <br/>
 
-        </div>
+            <br/><br/>
+
+            <a href="https://www.freepik.com/free-photos-vectors/flower"><font color="#F9DBDB">Flower vector created by Rawpixel.com - Freepik.com</font></a>
       </main>
     )
   }
