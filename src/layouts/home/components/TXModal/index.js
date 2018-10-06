@@ -3,7 +3,6 @@ import { drizzleConnect } from 'drizzle-react'
 import PropTypes from 'prop-types'
 
 //components
-import Paper from '@material-ui/core/Paper'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import Button from '@material-ui/core/Button'
