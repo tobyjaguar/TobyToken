@@ -5,9 +5,10 @@ import PropTypes from 'prop-types'
 /* components */
 import Account from './components/Account'
 import ShopItem from './components/ShopItem'
+import TransferToken from './components/TransferToken'
+import Admin from './components/Admin'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
-import Admin from './components/Admin'
 import TXModal from './components/TXModal'
 import Button from '@material-ui/core/Button'
 
@@ -29,11 +30,13 @@ class Home extends Component {
     this.handleInputChange = this.handleInputChange.bind(this)
     this.handleAccountButton = this.handleAccountButton.bind(this)
     this.handleShopButton = this.handleShopButton.bind(this)
+    this.handleTransferButton = this.handleTransferButton.bind(this)
     this.handleAdminButton = this.handleAdminButton.bind(this)
 
     this.state = {
         showAdmin: false,
         showShop: false,
+        showTransfer: false,
         showAccount: false,
         dataKeyOwner: null,
         dataKeyTknBalance: null,
@@ -89,6 +92,12 @@ class Home extends Component {
     })
   }
 
+  handleTransferButton() {
+    this.setState({
+      showTransfer: !this.state.showTransfer
+    })
+  }
+
   handleAdminButton() {
     var owner
     owner = this.props.accounts[0]
@@ -110,6 +119,7 @@ class Home extends Component {
     var displayAccount
     var displayAdmin
     var displayShop
+    var displayTransfer
 
     if (this.state.showAccount) {
       displayAccount = <Account tknBalance={tknBalanceGroomed} />
@@ -117,6 +127,10 @@ class Home extends Component {
 
     if (this.state.showShop) {
       displayShop = <ShopItem />
+    }
+
+    if (this.state.showTransfer) {
+      displayTransfer = <TransferToken tknBalance={this.state.tokenBalance} />
     }
 
     if (this.state.showAdmin) {
@@ -146,6 +160,12 @@ class Home extends Component {
             {displayShop}
             <br/>
             <Button type="Button" variant="contained" onClick={this.handleShopButton}> Buy Token </Button>
+            <br/>
+
+            <br/>
+            {displayTransfer}
+            <br/>
+            <Button type="Button" variant="contained" onClick={this.handleTransferButton}> Transfer Token </Button>
             <br/>
 
             <br/>
