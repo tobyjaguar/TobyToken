@@ -20,17 +20,6 @@ class Account extends Component {
 
     this.handleInputChange = this.handleInputChange.bind(this)
 
-    this.state = {
-
-    }
-  }
-
-  componentDidMount() {
-
-  }
-
-  componentDidUpdate(prevProps) {
-
   }
 
   handleInputChange(event) {

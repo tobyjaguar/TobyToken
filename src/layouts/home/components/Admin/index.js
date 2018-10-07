@@ -22,7 +22,7 @@ class Admin extends Component {
 
     this.state = {
       dataKeyStock: null,
-      shopStock: 0,
+      shopStock: "0",
       depositAmount: 0
     }
   }
@@ -35,6 +35,7 @@ class Admin extends Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.TokenShop !== prevProps.TokenShop) {
+        this.setState({ defaultState: false })
         this.setShopStock(this.props.TokenShop)
     }
   }

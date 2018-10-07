@@ -54,13 +54,10 @@ class ShopItem extends Component {
 
     this.setState({ dataKeyExchange, dataKeyRate, dataKeyDecimals, dataKeyStock, dataKeyTax })
 
-    if (this.props.TokenShop.getShopStock[this.state.dataKeyStock] !== undefined) {
-      this.setShopStock(this.props.TokenShop)
-    }
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.TokenShop !== prevProps.TokenShop) {
+    if (this.props.TokenShop !== prevProps.TokenShop || this.state.ethRate === "1") {
       if (this.props.TokenShop.USDTETH[this.state.dataKeyRate] !== undefined && prevProps.TokenShop.USDTETH[this.state.dataKeyRate] !== undefined) {
         this.setEthRate(this.props.TokenShop)
         this.setExchangeRate(this.props.TokenShop)
@@ -77,7 +74,7 @@ class ShopItem extends Component {
   }
 
   handleShowStateButton(event) {
-    this.setState({ showContractState: true })
+    this.setState({ showContractState: !this.state.showContractState })
   }
 
   handleBuyButton(event) {

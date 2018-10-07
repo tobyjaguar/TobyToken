@@ -9,21 +9,7 @@ class ContractState extends Component {
 
     this.contracts = context.drizzle.contracts
 
-
-    this.state = {
-
-    }
   }
-
-  componentDidMount() {
-
-  }
-
-  componentDidUpdate(prevProps) {
-
-  }
-
-
 
   render() {
 
