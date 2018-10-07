@@ -69,8 +69,8 @@ class ShopItem extends Component {
   }
 
   handleInputChange(event) {
-    this.setState({ [event.target.name]: event.target.value })
-    this.setTXParamValue(Math.ceil(event.target.value))
+    this.setState({ [event.target.name]: Math.abs(Math.round(Math.ceil(event.target.value))) })
+    this.setTXParamValue(Math.abs(Math.round(Math.ceil(event.target.value))))
   }
 
   handleShowStateButton(event) {
@@ -176,7 +176,7 @@ class ShopItem extends Component {
             <input name="purchaseAmount" type="number" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
             <Button type="Button" variant="contained" onClick={this.handleBuyButton}>Buy</Button>
           </form>
-          <p>Minimum $1</p>
+          <p>Minimum $1. Dollar values are rounded up to the next whole dollar.</p>
           <p>The oracle charges {oracleTaxGroomed} Ether to get the exchange rate </p>
 
       {/*
