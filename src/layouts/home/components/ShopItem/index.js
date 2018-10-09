@@ -40,7 +40,7 @@ class ShopItem extends Component {
       shopStock: "0",
       oracleTax: "0",
       weiAmount: '',
-      purchaseAmount: "0"
+      purchaseAmount: ""
     }
   }
 
@@ -69,8 +69,14 @@ class ShopItem extends Component {
   }
 
   handleInputChange(event) {
-    this.setState({ [event.target.name]: Math.abs(Math.round(Math.ceil(event.target.value))) })
-    this.setTXParamValue(Math.abs(Math.round(Math.ceil(event.target.value))))
+    if (-100 <= event.target.value && event.target.value <= 100) {
+      this.setState({ [event.target.name]: Math.abs(Math.trunc(event.target.value)) })
+      this.setTXParamValue(Math.abs((Math.trunc(event.target.value))))
+    } else {
+        this.setState({ [event.target.name]: '' })
+        this.setTXParamValue(0)
+    }
+
   }
 
   handleShowStateButton(event) {
@@ -171,12 +177,12 @@ class ShopItem extends Component {
           <p><strong>Store Stock: </strong> {shopStockGroomed}</p>
 
           <h3><p>Buy Tokens: </p></h3>
-          <p>Dollar amount of Tokens:</p>
+          <p>Number of Tokens:</p>
           <form className="pure-form pure-form-stacked">
-            <input name="purchaseAmount" type="number" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
+            <input name="purchaseAmount" type="number" placeholder="tokens" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
             <Button type="Button" variant="contained" onClick={this.handleBuyButton}>Buy</Button>
           </form>
-          <p>Minimum $1. Dollar values are rounded up to the next whole dollar.</p>
+          <p>Purchase limits: $1-$100. Amounts default to whole tokens.</p>
           <p>The oracle charges {oracleTaxGroomed} Ether to get the exchange rate </p>
 
       {/*

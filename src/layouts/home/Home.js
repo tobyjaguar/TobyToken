@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 /* components */
 import Account from './components/Account'
 import ShopItem from './components/ShopItem'
+import BurnToken from './components/BurnToken'
 import TransferToken from './components/TransferToken'
 import Admin from './components/Admin'
 import Paper from '@material-ui/core/Paper'
@@ -31,11 +32,13 @@ class Home extends Component {
     this.handleAccountButton = this.handleAccountButton.bind(this)
     this.handleShopButton = this.handleShopButton.bind(this)
     this.handleTransferButton = this.handleTransferButton.bind(this)
+    this.handleBurnButton = this.handleBurnButton.bind(this)
     this.handleAdminButton = this.handleAdminButton.bind(this)
 
     this.state = {
         showAdmin: false,
         showShop: false,
+        showBurn: false,
         showTransfer: false,
         showAccount: false,
         dataKeyOwner: null,
@@ -92,6 +95,12 @@ class Home extends Component {
     })
   }
 
+  handleBurnButton() {
+    this.setState({
+      showBurn: !this.state.showBurn
+    })
+  }
+
   handleTransferButton() {
     this.setState({
       showTransfer: !this.state.showTransfer
@@ -119,6 +128,7 @@ class Home extends Component {
     var displayAccount
     var displayAdmin
     var displayShop
+    var displayBurn
     var displayTransfer
 
     if (this.state.showAccount) {
@@ -127,6 +137,10 @@ class Home extends Component {
 
     if (this.state.showShop) {
       displayShop = <ShopItem />
+    }
+
+    if (this.state.showBurn) {
+      displayBurn = <BurnToken tknBalance={this.state.tokenBalance} />
     }
 
     if (this.state.showTransfer) {
@@ -160,6 +174,12 @@ class Home extends Component {
             {displayShop}
             <br/>
             <Button type="Button" variant="contained" onClick={this.handleShopButton}> Buy Token </Button>
+            <br/>
+
+            <br/>
+            {displayBurn}
+            <br/>
+            <Button type="Button" variant="contained" onClick={this.handleBurnButton}> Burn Token </Button>
             <br/>
 
             <br/>

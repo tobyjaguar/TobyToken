@@ -9,6 +9,8 @@ import Button from '@material-ui/core/Button'
 import Paper from '@material-ui/core/Paper'
 //import InvalidAddressModal from '../InvalidAddressModal'
 import Dialog from '@material-ui/core/Dialog'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import DialogActions from '@material-ui/core/DialogActions'
 
 //inline styles
 const styles = {
@@ -23,24 +25,26 @@ const dialogStyles = {
   }
 }
 
-class TransferToken extends Component {
+class BurnToken extends Component {
   constructor(props, context) {
     super(props)
 
     this.contracts = context.drizzle.contracts
 
-    this.handleRecipientInputChange = this.handleRecipientInputChange.bind(this)
     this.handleAmountInputChange = this.handleAmountInputChange.bind(this)
     this.handleDialogOpen = this.handleDialogOpen.bind(this)
+    this.handleDialogBurnOpen = this.handleDialogBurnOpen.bind(this)
     this.handleDialogClose = this.handleDialogClose.bind(this)
-    this.handleTransferButton = this.handleTransferButton.bind(this)
+    this.handleDialogBurnClose = this.handleDialogBurnClose.bind(this)
+    this.handleBurnButton = this.handleBurnButton.bind(this)
     this.handleSetMaxButton = this.handleSetMaxButton.bind(this)
     this.setTXParamValue = this.setTXParamValue.bind(this)
 
     this.state = {
       dialogOpen: false,
+      dialogBurnOpen: false,
       recipientAddress: '',
-      transferAmount: '',
+      burnAmount: '',
       weiAmount: '',
       alertText: ''
     }
@@ -48,10 +52,6 @@ class TransferToken extends Component {
 
   componentDidMount() {
     this.setState({invalidAddress: false})
-  }
-
-  handleRecipientInputChange(event) {
-    this.setState({ [event.target.name]: event.target.value })
   }
 
   handleAmountInputChange(event) {
@@ -63,20 +63,28 @@ class TransferToken extends Component {
     this.setState({ dialogOpen: true })
   }
 
+  handleDialogBurnOpen() {
+    this.setState({ dialogBurnOpen: true })
+  }
+
   handleDialogClose() {
     this.setState({ dialogOpen: false })
   }
 
-  handleTransferButton() {
-    if(this.context.drizzle.web3.utils.isAddress(this.state.recipientAddress) && this.state.weiAmount <= this.props.tknBalance) {
-      this.contracts.ERC20TobyToken.methods["transfer"].cacheSend(this.state.recipientAddress, this.state.weiAmount, {from: this.props.accounts[0]})
-    } else if (!this.context.drizzle.web3.utils.isAddress(this.state.recipientAddress)) {
-      this.setState({ alertText: `Oops! The receipient address isn't a correct ethereum address.`})
-      this.handleDialogOpen()
+  handleDialogBurnClose() {
+    this.setState({ dialogBurnOpen: false })
+  }
+
+  handleBurnButton() {
+    if(this.state.weiAmount <= this.props.tknBalance) {
+      this.handleDialogBurnClose()
+      this.contracts.ERC20TobyToken.methods["burn"].cacheSend(this.state.weiAmount, {from: this.props.accounts[0]})
     } else if (this.state.weiAmount > this.props.tknBalance) {
+      this.handleDialogBurnClose()
       this.setState({ alertText: 'Oops! You are trying to transfer more than you have.'})
       this.handleDialogOpen()
     } else {
+      this.handleDialogBurnClose()
       this.setState({ alertText: 'Oops! Something went wrong. Try checking your transaction details.'})
       this.handleDialogOpen()
     }
@@ -84,7 +92,7 @@ class TransferToken extends Component {
 
   handleSetMaxButton() {
     this.setState({
-      transferAmount: this.props.tknBalance
+      burnAmount: this.props.tknBalance
     })
   }
 
@@ -118,7 +126,7 @@ class TransferToken extends Component {
   }
 
   render() {
-    var transferGroomed = this.groomWei(this.state.transferAmount)
+    var transferGroomed = this.groomWei(this.state.burnAmount)
 
     return (
       <div>
@@ -130,12 +138,20 @@ class TransferToken extends Component {
           <p><Button type="Button" variant="contained" onClick={this.handleSetMaxButton}>Use Balance</Button></p>
 
           <form className="pure-form pure-form-stacked">
-            <input name="recipientAddress" type="text" placeholder="Send to:" value={this.state.recipientAddress} onChange={this.handleRecipientInputChange} />
-            <input name="transferAmount" type="text" placeholder="token bits to send:" value={this.state.transferAmount} onChange={this.handleAmountInputChange} />
-            <Button type="Button" variant="contained" onClick={this.handleTransferButton}>Transfer</Button>
+            <input name="burnAmount" type="text" placeholder="token bits to burn:" value={this.state.burnAmount} onChange={this.handleAmountInputChange} />
+            <Button type="Button" variant="contained" onClick={this.handleDialogBurnOpen}>Burn</Button>
           </form>
-          <p>Tokens to transfer: {transferGroomed} </p>
+          <p>Tokens to burn: {transferGroomed} </p>
       </Paper>
+
+      <Dialog PaperProps={dialogStyles} open={this.state.dialogBurnOpen} >
+        <DialogTitle>Destroying Tokens</DialogTitle>
+          <p>WARNING!!! This will destroy your tokens</p>
+        <DialogActions>
+          <Button variant="contained" onClick={this.handleDialogBurnClose} >Cancel</Button>
+          <Button variant="contained" onClick={this.handleBurnButton} >Burn 'em!</Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog PaperProps={dialogStyles} open={this.state.dialogOpen} >
         <p>{this.state.alertText}</p>
@@ -146,7 +162,7 @@ class TransferToken extends Component {
   }
 }
 
-TransferToken.contextTypes = {
+BurnToken.contextTypes = {
   drizzle: PropTypes.object
 }
 
@@ -162,4 +178,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default drizzleConnect(TransferToken, mapStateToProps)
+export default drizzleConnect(BurnToken, mapStateToProps)
