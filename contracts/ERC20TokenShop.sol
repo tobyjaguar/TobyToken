@@ -41,6 +41,7 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
   event LogSetOracleTaxOverride(address eSender, uint256 eOracleTax);
   event LogSetQueryURL(address eSender, string eQueryURL);
   event LogSetOraclizePriceType(address eSender, string eOraclizePriceType);
+  event LogApproveBurn(address eRecipient, address eSender, uint256 eAmount);
   event LogDeposit(address eSender, uint256 eValue);
   event LogWithdraw(address eSender, uint256 eValue);
   event LogSetETHXUpdated(address eSender, string eETHXRate);
@@ -113,7 +114,7 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     //wei to token bit conversion via dollars
     //$ per ETH * ETH per wei * (1 / $ per tokenbit) = tokenbit per wei
     uint256 _amount;
-    _amount = msg.value.mul(exchangeRate).mul(USDTETH).div(10**(18)).sub(oracleTax);
+    _amount = msg.value.sub(oracleTax).mul(exchangeRate).mul(USDTETH).div(10**(18));
     emit LogBuyToken(msg.sender, msg.value, _amount);
     tokenContract.transfer(msg.sender, _amount);
     return true;
@@ -203,6 +204,17 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     _setOraclizePriceType(_type);
     return true;
   }
+
+  function approveBurn(address _recipient, uint256 _amount)
+    onlyOwner
+    whenNotPaused
+    public
+    returns (bool)
+ {
+    emit LogApproveBurn(_recipient, msg.sender, _amount);
+    tokenContract.approve(_recipient, _amount);
+    return true;
+ }
 
   function deposit()
     onlyOwner

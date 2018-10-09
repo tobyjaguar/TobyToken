@@ -18,8 +18,13 @@ const drizzleOptions = {
     TokenShopBuy: ['LogBuyToken'],
     TokenShopSetExchange: ['LogSetExchangeRate'],
     TokenShopSetEthXRate: ['LogSetETHXRate'],
+    TokenShopETHXUpdated: ['LogSetETHXUpdated'],
     TokenShopDeposit: ['LogDeposit'],
-    TokenShopWithdraw: ['LogWithdraw']
+    TokenShopWithdraw: ['LogWithdraw'],
+    TokenShopTaxOverride: ['LogSetOracleTaxOverride'],
+    TokenShopQueryURL: ['LogSetQueryURL'],
+    TokenShopOraclePriceType: ['LogSetOraclizePriceType'],
+    TokenShopApproveBurn: ['LogApproveBurn']
   },
   polls: {
     accounts: 1500

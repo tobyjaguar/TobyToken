@@ -105,12 +105,20 @@ class Admin extends Component {
 
           <strong><p>Allocate Tokens to the Shop:</p></strong>
           <p>Mint Tokens to the store:</p>
-          <ContractForm contract="ERC20TobyToken" method="mint" labels={['Recipient', 'Amount to Mint']} />
+          <ContractForm contract="ERC20TobyToken" method="mint" labels={['Shop Address', 'Amount to Mint']} />
           <br/>
 
-          <strong><p>Burn Tokens</p></strong>
+          <strong><p>Burn Tokens from your Account</p></strong>
           <p>Burn your tokens.</p>
           <ContractForm contract="ERC20TobyToken" method="burn" labels={['Amount to Burn']} />
+
+          <strong><p>Approve Owner to Burn Shop Stock</p></strong>
+          <p>Approve Owner.</p>
+          <ContractForm contract="ERC20TokenShop" method="approveBurn" labels={['Owner Address', 'Approve Amount']} />
+
+          <strong><p>Burn Tokens from Shop Stock</p></strong>
+          <p>Burn inventory.</p>
+          <ContractForm contract="ERC20TobyToken" method="burnFrom" labels={['Shop Address', 'Amount to Burn']} />
       </Paper>
       </div>
     )
