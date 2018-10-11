@@ -41,7 +41,6 @@ class TransferToken extends Component {
       dialogOpen: false,
       recipientAddress: '',
       transferAmount: '',
-      weiAmount: '',
       alertText: ''
     }
   }
@@ -68,12 +67,15 @@ class TransferToken extends Component {
   }
 
   handleTransferButton() {
-    if(this.context.drizzle.web3.utils.isAddress(this.state.recipientAddress) && this.state.weiAmount <= this.props.tknBalance) {
-      this.contracts.ERC20TobyToken.methods["transfer"].cacheSend(this.state.recipientAddress, this.state.weiAmount, {from: this.props.accounts[0]})
+    var BN = web3.utils.BN
+    var amountBN = new BN(this.state.transferAmount)
+    var balanceBN = new BN(this.props.tknBalance)
+    if(this.context.drizzle.web3.utils.isAddress(this.state.recipientAddress) && amountBN.lte(balanceBN)) {
+      this.contracts.ERC20TobyToken.methods["transfer"].cacheSend(this.state.recipientAddress, this.state.transferAmount, {from: this.props.accounts[0]})
     } else if (!this.context.drizzle.web3.utils.isAddress(this.state.recipientAddress)) {
       this.setState({ alertText: `Oops! The receipient address isn't a correct ethereum address.`})
       this.handleDialogOpen()
-    } else if (this.state.weiAmount > this.props.tknBalance) {
+    } else if (amountBN.gt(balanceBN)) {
       this.setState({ alertText: 'Oops! You are trying to transfer more than you have.'})
       this.handleDialogOpen()
     } else {
@@ -95,12 +97,12 @@ class TransferToken extends Component {
       //var tokenDecimals = Math.pow(10,Number(this.state.tokenDecimals))
       //var tokenBits = web3.utils.toBN(tokenDecimals)
       this.setState({
-        weiAmount: tokenAmount.toString()
+        transferAmount: tokenAmount.toString()
       })
     }
     else {
       this.setState({
-        weiAmount: "0"
+        transferAmount: "0"
       })
     }
   }

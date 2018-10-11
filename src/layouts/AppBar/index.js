@@ -45,7 +45,7 @@ class MyAppBar extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.props.TokenShop !== prevProps.TokenShop) {
+    if (this.props.TokenShop !== prevProps.TokenShop || this.state.TokenShop !== prevState.TokenShop) {
       this.setTokenBalance()
     }
   }

@@ -45,7 +45,6 @@ class BurnToken extends Component {
       dialogBurnOpen: false,
       recipientAddress: '',
       burnAmount: '',
-      weiAmount: '',
       alertText: ''
     }
   }
@@ -55,7 +54,7 @@ class BurnToken extends Component {
   }
 
   handleAmountInputChange(event) {
-    this.setState({ [event.target.name]: event.target.value })
+    //this.setState({ [event.target.name]: event.target.value })
     this.setTXParamValue(event.target.value)
   }
 
@@ -76,10 +75,13 @@ class BurnToken extends Component {
   }
 
   handleBurnButton() {
-    if(this.state.weiAmount <= this.props.tknBalance) {
+    var BN = web3.utils.BN
+    var amountBN = new BN(this.state.burnAmount)
+    var balanceBN = new BN(this.props.tknBalance)
+    if(amountBN.lte(balanceBN)) {
       this.handleDialogBurnClose()
-      this.contracts.ERC20TobyToken.methods["burn"].cacheSend(this.state.weiAmount, {from: this.props.accounts[0]})
-    } else if (this.state.weiAmount > this.props.tknBalance) {
+      this.contracts.ERC20TobyToken.methods["burn"].cacheSend(this.state.burnAmount, {from: this.props.accounts[0]})
+    } else if (amountBN.gt(balanceBN)) {
       this.handleDialogBurnClose()
       this.setState({ alertText: 'Oops! You are trying to transfer more than you have.'})
       this.handleDialogOpen()
@@ -103,12 +105,12 @@ class BurnToken extends Component {
       //var tokenDecimals = Math.pow(10,Number(this.state.tokenDecimals))
       //var tokenBits = web3.utils.toBN(tokenDecimals)
       this.setState({
-        weiAmount: tokenAmount.toString()
+        burnAmount: tokenAmount.toString()
       })
     }
     else {
       this.setState({
-        weiAmount: "0"
+        burnAmount: "0"
       })
     }
   }
