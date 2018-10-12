@@ -23,6 +23,8 @@ const dialogStyles = {
   }
 }
 
+const BN = web3.utils.BN
+
 class TransferToken extends Component {
   constructor(props, context) {
     super(props)
@@ -54,8 +56,19 @@ class TransferToken extends Component {
   }
 
   handleAmountInputChange(event) {
-    this.setState({ [event.target.name]: event.target.value })
-    this.setTXParamValue(event.target.value)
+    if (event.target.value.match(/^[0-9]{1,40}$/)) {
+      var amount = new BN(event.target.value)
+      if (amount.gte(0)) {
+        this.setState({ [event.target.name]: amount.toString() })
+        this.setTXParamValue(amount)
+      } else {
+        this.setState({ [event.target.name]: '' })
+        this.setTXParamValue(0)
+      }
+    } else {
+        this.setState({ [event.target.name]: '' })
+        this.setTXParamValue(0)
+      }
   }
 
   handleDialogOpen() {
@@ -67,7 +80,6 @@ class TransferToken extends Component {
   }
 
   handleTransferButton() {
-    var BN = web3.utils.BN
     var amountBN = new BN(this.state.transferAmount)
     var balanceBN = new BN(this.props.tknBalance)
     if(this.context.drizzle.web3.utils.isAddress(this.state.recipientAddress) && amountBN.lte(balanceBN)) {
@@ -91,32 +103,22 @@ class TransferToken extends Component {
   }
 
   setTXParamValue(_value) {
-    if (_value.match(/^[0-9]{1,40}$/)){
-      var BN = web3.utils.BN
-      var tokenAmount = new BN(_value)
-      //var tokenDecimals = Math.pow(10,Number(this.state.tokenDecimals))
-      //var tokenBits = web3.utils.toBN(tokenDecimals)
+    if (web3.utils.isBN(_value)) {
       this.setState({
-        transferAmount: tokenAmount.toString()
+        transferAmount: _value.toString()
       })
-    }
-    else {
+    } else {
       this.setState({
-        transferAmount: "0"
+        transferAmount: ''
       })
     }
   }
 
   groomWei(weiValue) {
-    if (weiValue.match(/^[0-9]{1,40}$/)){
-      var factor = Math.pow(10, 18)
-      var balance = this.context.drizzle.web3.utils.fromWei(weiValue)
-      balance = Math.round(balance * factor) / factor
-      return balance
-    }
-    else {
-      //return "Oops! Check the transfer amount. Nothing will be sent."
-    }
+    var factor = Math.pow(10, 18)
+    var balance = this.context.drizzle.web3.utils.fromWei(weiValue)
+    balance = Math.round(balance * factor) / factor
+    return balance
   }
 
   render() {

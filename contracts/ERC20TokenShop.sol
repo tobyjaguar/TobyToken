@@ -29,9 +29,11 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
 
   Token tokenContract;
 
+  uint256 public customGasLimit;
   uint256 public exchangeRate;
   uint256 public USDTETH;
   uint256 public oracleTax;
+
   string public queryURL;
   string public oraclizePriceType;
 
@@ -104,9 +106,9 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     require(msg.value > 0);
     require(tokenContract.balanceOf(address(this)) > 0);
     //check not asking for more than stock
-    require(tokenContract.balanceOf(address(this)) >= msg.value);
+    require(tokenContract.balanceOf(address(this)) >= msg.value.sub(oracleTax));
     //set Oracle Tax
-    oracleTax = oraclize_getPrice(oraclizePriceType); //URL
+    oracleTax = oraclize_getPrice(oraclizePriceType, customGasLimit); //URL
     //check value is at least 1 cross rate token bit unit per wei
     require(msg.value >= exchangeRate.mul(USDTETH).div(10**18).add(oracleTax));
     //get updated ETH USD cross rate
@@ -133,8 +135,8 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     public
     payable
   {
-    emit LogNewOraclizeQuery("Oraclize query was sent, standing by for the answer...");
-    oraclize_query(oraclizePriceType, queryURL);
+      emit LogNewOraclizeQuery("Oraclize query was sent, standing by for the answer...");
+      oraclize_query(oraclizePriceType, queryURL, customGasLimit);
   }
 
   //Shop functions

@@ -3,17 +3,26 @@ import { ContractData } from 'drizzle-react-components'
 import { drizzleConnect } from 'drizzle-react'
 import PropTypes from 'prop-types'
 import web3 from 'web3'
+import BigNumber from 'bignumber.js'
 
 //components
 import Button from '@material-ui/core/Button'
 import ContractState from '../ContractState'
 import Paper from '@material-ui/core/Paper'
+import Dialog from '@material-ui/core/Dialog'
 
 //inline styles
 const styles = {
     backgroundColor: '#F9DBDB',
     padding: 20
 
+}
+
+const dialogStyles = {
+  style: {
+    backgroundColor: '#F9DBDB',
+    padding: 20
+  }
 }
 
 class ShopItem extends Component {
@@ -26,8 +35,11 @@ class ShopItem extends Component {
     this.handleInputChange = this.handleInputChange.bind(this)
     this.handleBuyButton = this.handleBuyButton.bind(this)
     this.setTXParamValue = this.setTXParamValue.bind(this)
+    this.handleDialogOpen = this.handleDialogOpen.bind(this)
+    this.handleDialogClose = this.handleDialogClose.bind(this)
 
     this.state = {
+      dialogOpen: false,
       dataKeyRate: null,
       dataKeyExchange: null,
       dataKeyDecimals: null,
@@ -40,7 +52,8 @@ class ShopItem extends Component {
       shopStock: "0",
       oracleTax: "0",
       weiAmount: '',
-      purchaseAmount: ""
+      purchaseAmount: '',
+      alertText: ''
     }
   }
 
@@ -68,14 +81,28 @@ class ShopItem extends Component {
     }
   }
 
+  handleDialogOpen() {
+    this.setState({ dialogOpen: true })
+  }
+
+  handleDialogClose() {
+    this.setState({ dialogOpen: false })
+  }
+
   handleInputChange(event) {
-    if (-100 <= event.target.value && event.target.value <= 100) {
-      this.setState({ [event.target.name]: Math.abs(Math.trunc(event.target.value)) })
-      this.setTXParamValue(Math.abs((Math.trunc(event.target.value))))
+    if (event.target.value.match(/^[0-9.]{1,5}$/)){
+      if (0 <= event.target.value && event.target.value <= 100) {
+        var amount = Math.abs(parseFloat(event.target.value).toFixed(2))
+        this.setState({ [event.target.name]: amount })
+        this.setTXParamValue(amount)
+      } else {
+          this.setState({ [event.target.name]: '' })
+          this.setTXParamValue(0)
+        }
     } else {
         this.setState({ [event.target.name]: '' })
         this.setTXParamValue(0)
-    }
+      }
 
   }
 
@@ -84,11 +111,19 @@ class ShopItem extends Component {
   }
 
   handleBuyButton(event) {
-    this.contracts.ERC20TokenShop.methods["buyToken"].cacheSend({from: this.props.accounts[0], value: this.state.weiAmount})
+    var sendAmount = new BigNumber(this.state.weiAmount)
+    var tax = new BigNumber(this.state.oracleTax)
+    if (sendAmount.gt(tax)) {
+      this.contracts.ERC20TokenShop.methods["buyToken"].cacheSend({from: this.props.accounts[0], value: this.state.weiAmount})
+    } else {
+      this.setState({ alertText: "Oops! Check purchase amount."})
+      this.handleDialogOpen()
+    }
   }
 
   setTXParamValue(_value) {
     this.getOracleTaxRate()
+    /**
     var BN = web3.utils.BN
     var weiDecimal = new BN(web3.utils.toWei('1', 'ether'))
     var tokenAmount = new BN(_value)
@@ -97,6 +132,19 @@ class ShopItem extends Component {
     var tokenDecimals = Math.pow(10,Number(this.state.tokenDecimals))
     var ethXRate = new BN(this.state.ethRate)
     var tokenBits = web3.utils.toBN(tokenDecimals)
+    **/
+    BigNumber.config({
+      ROUNDING_MODE: 0,
+      DECIMAL_PLACES: 0
+    })
+    var weiDecimal = new BigNumber(web3.utils.toWei('1', 'ether'))
+    var tokenAmount = new BigNumber(_value)
+    var exchangeRate = new BigNumber(this.state.exchangeRate)
+    var oracleTax = new BigNumber(this.state.oracleTax)
+    var tokenDecimals = Math.pow(10,Number(this.state.tokenDecimals))
+    var ethXRate = new BigNumber(this.state.ethRate)
+    var tokenBits = web3.utils.toBN(tokenDecimals)
+
     if (ethXRate.toNumber() === 0) {
       ethXRate = web3.utils.toBN(1)
     }
@@ -194,6 +242,11 @@ class ShopItem extends Component {
         <Button type="Button" variant="contained" onClick={this.handleShowStateButton}>More Info</Button>
         {contractInfo}
       </Paper>
+
+      <Dialog PaperProps={dialogStyles} open={this.state.dialogOpen} >
+        <p>{this.state.alertText}</p>
+        <p><Button variant="contained" onClick={this.handleDialogClose} >Close</Button></p>
+      </Dialog>
       </div>
     )
   }
