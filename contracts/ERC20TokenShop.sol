@@ -52,7 +52,11 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
   //Default exchange rate is $1/Token
   constructor(address _instance) public {
     tokenContract = Token(_instance);
+    USDTETH = 200;
     exchangeRate = 1000000000000000000;
+    customGasLimit = 100000;
+    oraclizePriceType = "URL";
+    queryURL = "json(https://api.gdax.com/products/ETH-USD/ticker).price";
   }
 
   //Token functions
@@ -163,7 +167,10 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     public
     returns (bool)
   {
-    _setExchangeRate(_dollars_per_token);
+    uint256 _decimals = getTokenDecimals();
+    _decimals = 10**(_decimals);
+    exchangeRate = _decimals.div(_dollars_per_token);
+    emit LogSetExchangeRate(msg.sender, _dollars_per_token, exchangeRate);
     return true;
   }
 
@@ -173,7 +180,8 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     public
     returns (bool)
   {
-    _setETHXRateOverride(_dollars_per_eth);
+    USDTETH = _dollars_per_eth;
+    emit LogSetETHXRateOverride(msg.sender, _dollars_per_eth);
     return true;
   }
 
@@ -183,7 +191,8 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     public
     returns (bool)
   {
-      _setOracleTaxOverride(_oracleTax);
+      oracleTax = _oracleTax;
+      emit LogSetOracleTaxOverride(msg.sender, _oracleTax);
       return true;
   }
 
@@ -193,7 +202,8 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     public
     returns (bool)
   {
-    _setQueryURL(_url);
+    queryURL = _url;
+    emit LogSetQueryURL(msg.sender, _url);
     return true;
   }
 
@@ -203,7 +213,18 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     public
     returns (bool)
   {
-    _setOraclizePriceType(_type);
+    oraclizePriceType = _type;
+    emit LogSetOraclizePriceType(msg.sender, _type);
+    return true;
+  }
+
+  function setGasLimit(uint256 _newGasLimit)
+    onlyOwner
+    whenNotPaused
+    public
+    returns (bool)
+  {
+    customGasLimit = _newGasLimit;
     return true;
   }
 
@@ -241,44 +262,6 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     emit LogWithdraw(msg.sender, _amount);
     _owner.transfer(_amount);
     return true;
-  }
-
-  //Internal functions
-  function _setExchangeRate(uint256 _dollars_per_token)
-    internal
-  {
-    uint256 _decimals = getTokenDecimals();
-    _decimals = 10**(_decimals);
-    exchangeRate = _decimals.div(_dollars_per_token);
-    emit LogSetExchangeRate(msg.sender, _dollars_per_token, exchangeRate);
-  }
-
-  function _setETHXRateOverride(uint256 _dollars_per_eth)
-    internal
-  {
-    USDTETH = _dollars_per_eth;
-    emit LogSetETHXRateOverride(msg.sender, _dollars_per_eth);
-  }
-
-  function _setOracleTaxOverride(uint256 _oracleTax)
-    internal
-  {
-    oracleTax = _oracleTax;
-    emit LogSetOracleTaxOverride(msg.sender, _oracleTax);
-  }
-
-  function _setQueryURL(string _url)
-    internal
-  {
-    queryURL = _url;
-    emit LogSetQueryURL(msg.sender, _url);
-  }
-
-  function _setOraclizePriceType(string _type)
-    internal
-  {
-    oraclizePriceType = _type;
-    emit LogSetOraclizePriceType(msg.sender, _type);
   }
 
   function kill()
