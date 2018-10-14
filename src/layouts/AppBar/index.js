@@ -59,6 +59,7 @@ class MyAppBar extends Component {
   }
 
   groomWei(weiValue) {
+    //y.toFormat(2)
     var factor = Math.pow(10, 4)
     var balance = this.context.drizzle.web3.utils.fromWei(weiValue)
     balance = Math.round(balance * factor) / factor

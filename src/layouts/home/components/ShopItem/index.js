@@ -47,10 +47,10 @@ class ShopItem extends Component {
       dataKeyTax: null,
       showContractState: false,
       ethRate: "1",
-      exchangeRate: "1",
-      tokenDecimals: "1",
-      shopStock: "0",
-      oracleTax: "0",
+      exchangeRate: "1000000000000000000",
+      tokenDecimals: "18",
+      shopStock: '',
+      oracleTax: '',
       weiAmount: '',
       purchaseAmount: '',
       alertText: ''
@@ -67,10 +67,23 @@ class ShopItem extends Component {
 
     this.setState({ dataKeyExchange, dataKeyRate, dataKeyDecimals, dataKeyStock, dataKeyTax })
 
+    //update ETHUSD crossrate
+    this.context.drizzle.contracts.ERC20TokenShop.methods.USDTETH().call()
+    .then(result => {
+      this.setState({
+        ethRate: result
+      })
+      return this.context.drizzle.contracts.ERC20TokenShop.methods.oracleTax().call()
+    })
+    .then(result => {
+      this.setState({
+        oracleTax: result
+      })
+    })
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props.TokenShop !== prevProps.TokenShop || this.state.ethRate === "1") {
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.TokenShop !== prevProps.TokenShop || this.state.TokenShop !== prevState.TokenShop) {
       if (this.props.TokenShop.USDTETH[this.state.dataKeyRate] !== undefined && prevProps.TokenShop.USDTETH[this.state.dataKeyRate] !== undefined) {
         this.setEthRate(this.props.TokenShop)
         this.setExchangeRate(this.props.TokenShop)
@@ -106,11 +119,11 @@ class ShopItem extends Component {
 
   }
 
-  handleShowStateButton(event) {
+  handleShowStateButton() {
     this.setState({ showContractState: !this.state.showContractState })
   }
 
-  handleBuyButton(event) {
+  handleBuyButton() {
     var sendAmount = new BigNumber(this.state.weiAmount)
     var tax = new BigNumber(this.state.oracleTax)
     if (sendAmount.gt(tax)) {
@@ -122,7 +135,6 @@ class ShopItem extends Component {
   }
 
   setTXParamValue(_value) {
-    this.getOracleTaxRate()
     /**
     var BN = web3.utils.BN
     var weiDecimal = new BN(web3.utils.toWei('1', 'ether'))
@@ -145,9 +157,6 @@ class ShopItem extends Component {
     var ethXRate = new BigNumber(this.state.ethRate)
     var tokenBits = web3.utils.toBN(tokenDecimals)
 
-    if (ethXRate.toNumber() === 0) {
-      ethXRate = web3.utils.toBN(1)
-    }
     this.setState({
       weiAmount: exchangeRate.mul(weiDecimal).mul(tokenAmount).div(ethXRate).div(tokenBits).add(oracleTax).toString()
     })
@@ -194,6 +203,7 @@ class ShopItem extends Component {
   }
 
   groomWei(weiValue) {
+    //y.toFormat(2)
     var factor = Math.pow(10, 4)
     var balance = this.context.drizzle.web3.utils.fromWei(weiValue)
     balance = Math.round(balance * factor) / factor
@@ -201,7 +211,6 @@ class ShopItem extends Component {
   }
 
   render() {
-
     var oracleTaxGroomed = this.groomWei(this.state.oracleTax)
     var shopStockGroomed = this.groomWei(this.state.shopStock)
     var sendAmountGroomed = this.groomWei(this.state.weiAmount)
@@ -230,7 +239,6 @@ class ShopItem extends Component {
             <input name="purchaseAmount" type="number" placeholder="tokens" value={this.state.purchaseAmount} onChange={this.handleInputChange} />
             <Button type="Button" variant="contained" onClick={this.handleBuyButton}>Buy</Button>
           </form>
-          <p>Purchase limits: $1-$100. Amounts default to whole tokens.</p>
           <p>The oracle charges {oracleTaxGroomed} Ether to get the exchange rate </p>
 
       {/*

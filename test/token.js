@@ -62,17 +62,7 @@ contract ('Token', function(accounts) {
     //end test
   });
 
-  //test owner
-  it("Should have owner set correctly", function() {
-    return contractInstance.owner({from: owner})
-    .then(result => {
-      assert.strictEqual(result, owner, "Owner did not return correctly");
-    });
-
-    //end test
-  });
-
-  //test mintalbe supply
+  //test mintable supply
   it("Should be able to mint supply", function() {
     return contractInstance.mint(owner, supply, {from: owner})
     .then(txObj => {
@@ -331,12 +321,5 @@ contract ('Token', function(accounts) {
 
     //end describe
   })
-
-  it("Should not self destruct if not owner", function() {
-    return expectedExceptionPromise(
-        () => contractInstance.kill({from: user01, gas: 3000000}),
-        3000000);
-    //end test
-  });
 
 });

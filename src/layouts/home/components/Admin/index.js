@@ -67,6 +67,8 @@ class Admin extends Component {
           <p><strong>Store Stock: </strong> {this.state.shopStock}</p>
           <p><strong>Exchange Rate: </strong> <ContractData contract="ERC20TokenShop" method="exchangeRate" /></p>
           <p><strong>ETH Cross Rate: </strong> <ContractData contract="ERC20TokenShop" method="USDTETH" /></p>
+          <p><strong>Gas Limit: </strong> <ContractData contract="ERC20TokenShop" method="customGasLimit" /></p>
+          <p><strong>URL Query: </strong> <ContractData contract="ERC20TokenShop" method="queryURL" /></p>
 
           <h3><p>Store Stats</p></h3>
           <strong>Set Exchange Rate: </strong>
@@ -84,6 +86,10 @@ class Admin extends Component {
           <br/>
           (***no quotes***)
           <div><ContractForm contract="ERC20TokenShop" method="setQueryURL" labels={['json(https://)']} /></div>
+          <br/>
+          <strong>Set Gas Limit: </strong>
+          <br/>
+          <div><ContractForm contract="ERC20TokenShop" method="setGasLimit" labels={['100000']} /></div>
           <br/>
 
           <strong>Withdraw: </strong>

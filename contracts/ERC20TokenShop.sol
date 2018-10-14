@@ -43,6 +43,7 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
   event LogSetOracleTaxOverride(address eSender, uint256 eOracleTax);
   event LogSetQueryURL(address eSender, string eQueryURL);
   event LogSetOraclizePriceType(address eSender, string eOraclizePriceType);
+  event LogSetGasLimit(address eSender, uint256 eGasLimit);
   event LogApproveBurn(address eRecipient, address eSender, uint256 eAmount);
   event LogDeposit(address eSender, uint256 eValue);
   event LogWithdraw(address eSender, uint256 eValue);
@@ -225,6 +226,7 @@ contract ERC20TokenShop is Ownable, Pausable, usingOraclize {
     returns (bool)
   {
     customGasLimit = _newGasLimit;
+    emit LogSetGasLimit(msg.sender, _newGasLimit);
     return true;
   }
 
