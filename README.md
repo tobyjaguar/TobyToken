@@ -1,7 +1,8 @@
 # Toby's Token Shop
 ![](https://github.com/tobyjaguar/TobyToken/blob/master/src/assets/Shop.jpg)
 ## a token shop app
-This is a living project and available to explore at [TobyToken.Shop](www.tobytoken.shop). If you would like to engage with the app, you will need to have [MetaMask](https://metamask.io/) installed and have the Ropsten network selected. 
+This is a living project and available to explore at [TobyToken.Shop](https://www.tobytoken.shop). If you would like to engage with the app, you will need to have [MetaMask](https://metamask.io/) installed.
+The TokenShop will work on Mainnet and Ropsten. 
 
 The goal of the project is to detail the lifecycle of a token economy, while documenting the steps involved in deploying a somewhat destributed app on the ethereum blockchain. This repo and corresponding app is a work-in-progress. It will continue to be updated, and serve as a social art project.
 
@@ -42,3 +43,7 @@ If some node modules do not download, the build will complain and they can be do
 The app uses [dotenv](https://www.npmjs.com/package/dotenv) to pull in the HD Wallet Mnemonic for the wallet accounts and the [Infura](https://infura.io/) Access Token. If deployment is an interest a .env file will need to be created.
 
 For development testing, MetaMask will serve as the Web3 provider.
+
+## Lessons
+
+There are a lot of them, and they will be written here soon.
