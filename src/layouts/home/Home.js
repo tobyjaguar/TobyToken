@@ -111,7 +111,9 @@ class Home extends Component {
     var owner
     owner = this.props.accounts[0]
     if (this.state.shopKeeper === owner) {
-      this.setState({showAdmin: true})
+      this.setState({
+        showAdmin: !this.state.showAdmin
+      })
     }
   }
 
@@ -171,34 +173,37 @@ class Home extends Component {
           <TXModal />
 
             <br/>
-            {displayShop}
-            <br/>
             <Button type="Button" variant="contained" onClick={this.handleShopButton}> Buy Token </Button>
             <br/>
-
             <br/>
-            {displayBurn}
+            {displayShop}
+
             <br/>
             <Button type="Button" variant="contained" onClick={this.handleBurnButton}> Burn Token </Button>
             <br/>
-
             <br/>
-            {displayTransfer}
+            {displayBurn}
+
             <br/>
             <Button type="Button" variant="contained" onClick={this.handleTransferButton}> Transfer Token </Button>
             <br/>
-
             <br/>
-            {displayAccount}
+            {displayTransfer}
+
             <br/>
             <Button type="Button" variant="contained" onClick={this.handleAccountButton}> Account Info </Button>
             <br/>
+            <br/>
+            {displayAccount}
 
             <br/>
+            {this.state.shopKeeper === this.props.accounts[0] ?
+              <Button type="Button" variant="contained" onClick={this.handleAdminButton}> Admin </Button> : 
+              null
+            }
+            <br/>
+            <br/>
             {displayAdmin}
-            <br/>
-            <Button type="Button" variant="contained" onClick={this.handleAdminButton}> Admin </Button>
-            <br/>
             <br/>
 
             <br/><br/>
