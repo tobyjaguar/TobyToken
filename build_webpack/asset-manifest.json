@@ -1,8 +1,8 @@
 {
   "main.css": "static/css/main.5c9e4f72.css",
   "main.css.map": "static/css/main.5c9e4f72.css.map",
-  "main.js": "static/js/main.cb154281.js",
-  "main.js.map": "static/js/main.cb154281.js.map",
+  "main.js": "static/js/main.d5593f39.js",
+  "main.js.map": "static/js/main.d5593f39.js.map",
   "static/media/Open-Sans-regular.eot": "static/media/Open-Sans-regular.c35ad7c7.eot",
   "static/media/Open-Sans-regular.svg": "static/media/Open-Sans-regular.7e735d7a.svg",
   "static/media/Open-Sans-regular.ttf": "static/media/Open-Sans-regular.953de7ba.ttf",
@@ -17,5 +17,6 @@
   "static/media/Oswald-regular.svg": "static/media/Oswald-regular.48b6c164.svg",
   "static/media/Oswald-regular.ttf": "static/media/Oswald-regular.8573096c.ttf",
   "static/media/Oswald-regular.woff": "static/media/Oswald-regular.4cd42bac.woff",
-  "static/media/Oswald-regular.woff2": "static/media/Oswald-regular.29b3a057.woff2"
+  "static/media/Oswald-regular.woff2": "static/media/Oswald-regular.29b3a057.woff2",
+  "static/media/Shop.jpg": "static/media/Shop.724f9dc0.jpg"
 }
