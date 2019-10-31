@@ -72,3 +72,6 @@ typings/
 
 # Serverless directories
 .serverless
+
+# webpack build directory
+build_webpack/
